@@ -30,6 +30,12 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 
+	// MapStruct core annotations
+	implementation 'org.mapstruct:mapstruct:1.6.3'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+	// If using Lombok, the binding must be present to ensure they work together
+	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+
 	implementation 'org.apache.commons:commons-lang3:3.18.0'
 
 	// Test
