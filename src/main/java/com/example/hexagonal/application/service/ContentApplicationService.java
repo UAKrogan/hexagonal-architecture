@@ -3,7 +3,6 @@ package com.example.hexagonal.application.service;
 import com.example.hexagonal.application.port.in.GetContentUseCase;
 import com.example.hexagonal.application.port.in.command.GetContentCommand;
 import com.example.hexagonal.application.port.in.result.GetContentResult;
-import com.example.hexagonal.application.port.out.ContentProviderPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,18 +13,12 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class ContentApplicationService implements GetContentUseCase {
 
-    private final ContentProviderPort contentProviderPort;
+    private final ContentProviderStrategyResolver strategyResolver;
 
     @Override
     public Mono<GetContentResult> getContent(GetContentCommand command) {
-        return contentProviderPort.getContent(command.contentId())
-            .doOnNext(content ->
-                log.info(
-                    "Successfully retrieved content from provider: id={}, source={}",
-                    content.id(),
-                    content.source()
-                )
-            )
+        return strategyResolver.resolve(command.provider())
+            .getContent(command.contentId())
             .map(content -> new GetContentResult(
                 content.id(),
                 content.title(),
