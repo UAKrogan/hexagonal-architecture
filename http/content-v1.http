@@ -1,0 +1,11 @@
+### Get content V1
+
+POST {{host}}/api/content
+Content-Type: application/json
+x-api-version: 1
+x-correlation-id: {{$uuid}}
+
+{
+  "contentId": 1,
+  "provider": "JSONPLACEHOLDER"
+}
