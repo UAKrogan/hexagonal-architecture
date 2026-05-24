@@ -1,0 +1,37 @@
+plugins {
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.boot.dependency.management)
+}
+
+dependencies {
+
+    // Spring Boot
+    implementation libs.spring.boot.webflux
+    implementation libs.spring.boot.actuator
+    implementation libs.spring.boot.validation
+
+    // Lombok
+    compileOnly libs.lombok
+
+    // MapStruct core annotations
+    implementation libs.mapstruct
+
+    // Annotation processors
+    annotationProcessor libs.bundles.annotation.processors
+    testAnnotationProcessor libs.bundles.annotation.processors
+
+    // Utils
+    implementation libs.commons.lang3
+
+    // Test
+    testCompileOnly libs.lombok
+    testRuntimeOnly libs.junit.platform.launcher
+
+    testImplementation libs.archunit
+    testImplementation libs.spring.boot.webflux.test
+    testImplementation libs.spring.boot.actuator.test
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
