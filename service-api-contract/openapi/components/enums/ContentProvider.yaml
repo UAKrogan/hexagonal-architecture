@@ -1,0 +1,7 @@
+components:
+  schemas:
+    ContentProvider:
+      type: string
+      enum:
+        - JSONPLACEHOLDER
+        - DUMMYJSON

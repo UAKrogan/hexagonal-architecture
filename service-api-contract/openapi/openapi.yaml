@@ -1,0 +1,42 @@
+openapi: 3.0.0
+
+info:
+  title: Hexagonal Architecture API
+  description: Reactive multi-provider content API.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /api/v1/content:
+    post:
+      tags:
+        - Content
+      operationId: getContent
+      summary: Retrieve content from external provider
+      description: Retrieve content from external provider
+
+      parameters:
+        - $ref: "./components/Headers.yaml#/components/parameters/x-correlation-id"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./components/content/GetContentRequest.yaml#/components/schemas/GetContentRequest"
+
+      responses:
+        200:
+          description: Content successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "./components/content/GetContentResponse.yaml#/components/schemas/GetContentResponse"
+        400:
+          $ref: "./components/Responses.yaml#/components/responses/BadRequest_400"
+        404:
+          $ref: "./components/Responses.yaml#/components/responses/NotFound_404"
+        500:
+          $ref: "./components/Responses.yaml#/components/responses/InternalServerError_500"

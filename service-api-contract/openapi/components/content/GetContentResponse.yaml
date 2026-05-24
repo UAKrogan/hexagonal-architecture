@@ -1,0 +1,17 @@
+components:
+  schemas:
+    GetContentResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        content:
+          type: string
+        authorId:
+          type: integer
+          format: int64
+        source:
+          $ref: "../enums/ContentProvider.yaml#/components/schemas/ContentProvider"

@@ -1,0 +1,14 @@
+components:
+  schemas:
+    GetContentRequest:
+      type: object
+      required:
+        - contentId
+        - provider
+      properties:
+        contentId:
+          type: integer
+          format: int64
+          example: 1
+        provider:
+          $ref: "../enums/ContentProvider.yaml#/components/schemas/ContentProvider"

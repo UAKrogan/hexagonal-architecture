@@ -18,3 +18,4 @@ dependencyResolutionManagement {
 rootProject.name = 'hexagonal-architecture'
 
 include 'service'
+include 'service-api-contract'

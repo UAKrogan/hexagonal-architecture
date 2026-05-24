@@ -1,0 +1,66 @@
+plugins {
+    alias(libs.plugins.openapi.generator)
+    alias(libs.plugins.spring.boot.dependency.management)
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "${layout.buildDirectory.get().asFile}/generated/src/main/java"
+        }
+    }
+}
+
+dependencies {
+    compileOnly libs.spring.boot.webflux
+    compileOnly libs.spring.boot.validation
+    compileOnly libs.swagger.annotations
+}
+
+afterEvaluate {
+    tasks.named('compileJava') {
+        dependsOn tasks.openApiGenerate
+    }
+}
+
+def specificationDirectory = layout.projectDirectory.dir('openapi')
+def specificationFile = 'openapi.yaml'
+def outputDirectory = layout.buildDirectory.dir('generated').get().asFile
+def generatedPackage = 'com.example.hexagonal.contract'
+
+openApiGenerate {
+    generatorName = 'spring'
+    inputSpec = specificationDirectory.file(specificationFile).asFile.toURI().toString()
+    outputDir = outputDirectory.path
+    apiPackage = "${generatedPackage}.api"
+    modelPackage = "${generatedPackage}.model"
+    modelNameSuffix = 'Dto'
+
+    generateApiTests = false
+    generateModelTests = false
+
+    generateModelDocumentation = false
+    generateApiDocumentation = false
+
+    globalProperties = [
+            apis           : '',
+            models         : '',
+            supportingFiles: 'false'
+    ]
+
+    configOptions = [
+            library                : 'spring-boot',
+            useSpringBoot4         : 'true',
+            springApiVersion       : '1',
+            reactive               : 'true',
+            useJakartaEe           : 'true',
+            useJackson3            : 'true',
+            useJspecify            : 'true',
+            interfaceOnly          : 'true',
+            skipDefaultInterface   : 'true',
+            useTags                : 'true',
+            useResponseEntity      : 'false',
+            hideGenerationTimestamp: 'true',
+            openApiNullable        : 'false'
+    ]
+}
