@@ -1,5 +1,14 @@
 components:
   parameters:
+    x-api-version:
+      name: x-api-version
+      description: Version of the API.
+      in: header
+      required: true
+      schema:
+        type: string
+      x-version-param: true
+
     x-correlation-id:
       name: x-correlation-id
       description: UUID to identify a specific request in case of an issue.

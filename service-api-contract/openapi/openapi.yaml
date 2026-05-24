@@ -9,8 +9,9 @@ servers:
   - url: http://localhost:8080
 
 paths:
-  /api/v1/content:
+  /api/content:
     post:
+      x-spring-api-version: "1"
       tags:
         - Content
       operationId: getContent
@@ -18,6 +19,7 @@ paths:
       description: Retrieve content from external provider
 
       parameters:
+        - $ref: "./components/Headers.yaml#/components/parameters/x-api-version"
         - $ref: "./components/Headers.yaml#/components/parameters/x-correlation-id"
 
       requestBody:

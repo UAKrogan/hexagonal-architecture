@@ -23,6 +23,8 @@ dependencies {
     // Utils
     implementation libs.commons.lang3
 
+    implementation projects.serviceApiContract
+
     // Test
     testCompileOnly libs.lombok
     testRuntimeOnly libs.junit.platform.launcher

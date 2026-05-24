@@ -1,15 +1,15 @@
 package com.example.hexagonal.adapter.in.web.mapper;
 
-import com.example.hexagonal.adapter.in.web.dto.request.GetContentWebRequest;
-import com.example.hexagonal.adapter.in.web.dto.response.GetContentWebResponse;
 import com.example.hexagonal.application.port.in.command.GetContentCommand;
 import com.example.hexagonal.application.port.in.result.GetContentResult;
+import com.example.hexagonal.contract.model.GetContentRequestDto;
+import com.example.hexagonal.contract.model.GetContentResponseDto;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface ContentWebMapper {
 
-    GetContentCommand toCommand(GetContentWebRequest request);
+    GetContentCommand toCommand(GetContentRequestDto dto);
 
-    GetContentWebResponse toResponse(GetContentResult result);
+    GetContentResponseDto toDto(GetContentResult result);
 }

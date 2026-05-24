@@ -1,4 +1,5 @@
 plugins {
+    id 'java-library'
     alias(libs.plugins.openapi.generator)
     alias(libs.plugins.spring.boot.dependency.management)
 }
@@ -13,8 +14,9 @@ sourceSets {
 
 dependencies {
     compileOnly libs.spring.boot.webflux
-    compileOnly libs.spring.boot.validation
-    compileOnly libs.swagger.annotations
+
+    api libs.spring.boot.validation
+    api libs.swagger.annotations
 }
 
 afterEvaluate {
@@ -51,7 +53,6 @@ openApiGenerate {
     configOptions = [
             library                : 'spring-boot',
             useSpringBoot4         : 'true',
-            springApiVersion       : '1',
             reactive               : 'true',
             useJakartaEe           : 'true',
             useJackson3            : 'true',
