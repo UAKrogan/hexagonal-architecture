@@ -1,4 +1,4 @@
-package com.example.hexagonal.bootstrap.configuration;
+package com.example.hexagonal.adapter.in.web.config;
 
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.context.annotation.Configuration;
