@@ -123,6 +123,33 @@ public class HexagonalArchitectureTest {
             .because("Cyclic dependencies in adapter layer create tight coupling " +
                 "between different infrastructure concerns");
 
+    @ArchTest
+    static final ArchRule ADAPTER_IN_SHOULD_NOT_DEPEND_ON_ADAPTER_OUT =
+        noClasses()
+            .that().resideInAPackage("..adapter.in..")
+            .should().dependOnClassesThat()
+            .resideInAPackage("..adapter.out..")
+            .because("Input adapters must enter the application through input ports " +
+                "and must not call output adapters directly");
+
+    @ArchTest
+    static final ArchRule ADAPTER_OUT_SHOULD_NOT_DEPEND_ON_ADAPTER_IN =
+        noClasses()
+            .that().resideInAPackage("..adapter.out..")
+            .should().dependOnClassesThat()
+            .resideInAPackage("..adapter.in..")
+            .because("Output adapters are secondary adapters and must not depend on " +
+                "transport-specific input adapter concerns");
+
+    @ArchTest
+    static final ArchRule GENERATED_CONTRACTS_SHOULD_NOT_LEAK_INTO_DOMAIN_OR_APPLICATION =
+        noClasses()
+            .that().resideInAnyPackage("..domain..", "..application..")
+            .should().dependOnClassesThat()
+            .resideInAnyPackage("..contract.api..", "..contract.model..")
+            .because("Generated OpenAPI contracts are transport models and must stay " +
+                "outside domain and application layers");
+
     // ==============================================
     // Framework Isolation Tests (8 tests)
     // ==============================================

@@ -16,6 +16,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.validation.method.ParameterErrors;
 import org.springframework.validation.method.ParameterValidationResult;
+import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.support.WebExchangeBindException;
@@ -80,6 +81,15 @@ public class ErrorResponseResolver {
                 "Missing required " + label,
                 "Required " + label + " '" + ex.getName() + "' is missing.",
                 List.of(validationError(ex.getName(), "required", "Required " + label + " is missing."))
+            );
+        }
+
+        if (error instanceof InvalidApiVersionException ex) {
+            return validationProblem(
+                "invalid-api-version",
+                "Invalid API version",
+                nonBlankOrDefault(ex.getReason(), "The requested API version is not supported."),
+                List.of(validationError(API_VERSION_HEADER, "invalid", "Requested API version is not supported."))
             );
         }
 
