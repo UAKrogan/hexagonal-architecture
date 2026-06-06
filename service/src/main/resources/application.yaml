@@ -1,3 +1,10 @@
 spring:
   application:
     name: hexagonal
+  config:
+    import:
+      - classpath:config/header-propagation.yaml
+
+logging:
+  pattern:
+    level: "%5p [correlationId:%X{x-correlation-id:-} apiVersion:%X{x-api-version:-}]"

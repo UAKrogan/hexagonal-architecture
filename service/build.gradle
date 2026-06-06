@@ -7,6 +7,7 @@ dependencies {
 
     // Spring Boot
     implementation libs.spring.boot.webflux
+    implementation libs.spring.boot.webclient
     implementation libs.spring.boot.actuator
     implementation libs.spring.boot.validation
 
@@ -22,6 +23,7 @@ dependencies {
 
     // Utils
     implementation libs.commons.lang3
+    implementation libs.micrometer.context.propagation
 
     implementation projects.serviceApiContract
 

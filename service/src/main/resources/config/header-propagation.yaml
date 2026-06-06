@@ -1,0 +1,6 @@
+application:
+  http:
+    propagation:
+      headers:
+        - x-correlation-id
+        - x-api-version
