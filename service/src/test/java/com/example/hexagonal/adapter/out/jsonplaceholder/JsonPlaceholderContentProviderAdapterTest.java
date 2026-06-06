@@ -1,5 +1,6 @@
 package com.example.hexagonal.adapter.out.jsonplaceholder;
 
+import com.example.hexagonal.test.tag.UnitTest;
 import com.example.hexagonal.adapter.out.jsonplaceholder.client.JsonPlaceholderClient;
 import com.example.hexagonal.adapter.out.jsonplaceholder.dto.JsonPlaceholderContentResponse;
 import com.example.hexagonal.adapter.out.jsonplaceholder.mapper.JsonPlaceholderContentMapper;
@@ -13,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@UnitTest
 class JsonPlaceholderContentProviderAdapterTest {
 
     private final JsonPlaceholderClient jsonPlaceholderClient = mock(JsonPlaceholderClient.class);

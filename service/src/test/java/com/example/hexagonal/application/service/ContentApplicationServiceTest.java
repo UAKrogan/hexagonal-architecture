@@ -1,5 +1,6 @@
 package com.example.hexagonal.application.service;
 
+import com.example.hexagonal.test.tag.UnitTest;
 import com.example.hexagonal.application.port.in.command.GetContentCommand;
 import com.example.hexagonal.domain.exception.ContentNotFoundException;
 import com.example.hexagonal.domain.model.Content;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@UnitTest
 class ContentApplicationServiceTest {
 
     private final ContentProviderStrategyResolver strategyResolver = mock(ContentProviderStrategyResolver.class);

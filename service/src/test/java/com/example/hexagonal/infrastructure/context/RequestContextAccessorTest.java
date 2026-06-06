@@ -1,10 +1,12 @@
 package com.example.hexagonal.infrastructure.context;
 
+import com.example.hexagonal.test.tag.UnitTest;
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 
 import java.util.Map;
 
+@UnitTest
 class RequestContextAccessorTest {
 
     private final RequestContextAccessor requestContextAccessor = new RequestContextAccessor();

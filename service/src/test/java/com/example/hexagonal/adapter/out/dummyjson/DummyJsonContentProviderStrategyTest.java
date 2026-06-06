@@ -1,5 +1,6 @@
 package com.example.hexagonal.adapter.out.dummyjson;
 
+import com.example.hexagonal.test.tag.UnitTest;
 import com.example.hexagonal.domain.model.Content;
 import com.example.hexagonal.domain.model.ContentProviderType;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@UnitTest
 class DummyJsonContentProviderStrategyTest {
 
     private final DummyJsonContentProviderAdapter adapter = mock(DummyJsonContentProviderAdapter.class);

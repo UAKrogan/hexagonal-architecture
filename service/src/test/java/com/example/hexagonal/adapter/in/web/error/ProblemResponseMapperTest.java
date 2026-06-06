@@ -1,5 +1,6 @@
 package com.example.hexagonal.adapter.in.web.error;
 
+import com.example.hexagonal.test.tag.UnitTest;
 import com.example.hexagonal.contract.model.ProblemDto;
 import com.example.hexagonal.contract.model.ValidationErrorDto;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@UnitTest
 class ProblemResponseMapperTest {
 
     private final ProblemResponseMapper problemResponseMapper = Mappers.getMapper(ProblemResponseMapper.class);

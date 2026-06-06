@@ -1,5 +1,6 @@
 package com.example.hexagonal.adapter.out.dummyjson.client;
 
+import com.example.hexagonal.test.tag.IntegrationTest;
 import com.example.hexagonal.application.exception.ProviderUnavailableException;
 import com.example.hexagonal.domain.exception.ContentNotFoundException;
 import org.junit.jupiter.api.AfterEach;
@@ -16,6 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@IntegrationTest
 class DummyJsonClientTest {
 
     private DisposableServer server;

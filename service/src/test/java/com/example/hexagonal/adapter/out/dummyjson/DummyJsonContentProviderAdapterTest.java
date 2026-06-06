@@ -1,5 +1,6 @@
 package com.example.hexagonal.adapter.out.dummyjson;
 
+import com.example.hexagonal.test.tag.UnitTest;
 import com.example.hexagonal.adapter.out.dummyjson.client.DummyJsonClient;
 import com.example.hexagonal.adapter.out.dummyjson.dto.DummyJsonContentResponse;
 import com.example.hexagonal.adapter.out.dummyjson.mapper.DummyJsonContentMapper;
@@ -13,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@UnitTest
 class DummyJsonContentProviderAdapterTest {
 
     private final DummyJsonClient dummyJsonClient = mock(DummyJsonClient.class);

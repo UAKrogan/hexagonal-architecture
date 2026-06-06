@@ -1,5 +1,6 @@
 package com.example.hexagonal.adapter.in.web;
 
+import com.example.hexagonal.test.tag.FunctionalTest;
 import com.example.hexagonal.infrastructure.context.RequestContextHeaders;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
+@FunctionalTest
 class ContentApiIntegrationTest {
 
     private static final String CORRELATION_ID = "550e8400-e29b-41d4-a716-446655440000";

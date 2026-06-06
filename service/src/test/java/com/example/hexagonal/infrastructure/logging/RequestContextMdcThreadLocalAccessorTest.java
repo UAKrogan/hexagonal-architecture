@@ -1,5 +1,6 @@
 package com.example.hexagonal.infrastructure.logging;
 
+import com.example.hexagonal.test.tag.UnitTest;
 import com.example.hexagonal.infrastructure.context.RequestContext;
 import com.example.hexagonal.infrastructure.context.RequestContextHeaders;
 import org.junit.jupiter.api.AfterEach;
@@ -10,6 +11,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@UnitTest
 class RequestContextMdcThreadLocalAccessorTest {
 
     private final RequestContextMdcThreadLocalAccessor accessor = new RequestContextMdcThreadLocalAccessor();

@@ -1,5 +1,6 @@
 package com.example.hexagonal.adapter.in.web.context;
 
+import com.example.hexagonal.test.tag.UnitTest;
 import com.example.hexagonal.infrastructure.context.RequestContext;
 import com.example.hexagonal.infrastructure.context.RequestContextHeaders;
 import com.example.hexagonal.infrastructure.http.propagation.HeaderPropagationProperties;
@@ -13,6 +14,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@UnitTest
 class RequestContextWebFilterTest {
 
     private final HeaderPropagationProperties properties = new HeaderPropagationProperties(

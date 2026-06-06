@@ -1,5 +1,6 @@
 package com.example.hexagonal.adapter.in.web.error;
 
+import com.example.hexagonal.test.tag.UnitTest;
 import com.example.hexagonal.application.exception.ApplicationException;
 import com.example.hexagonal.application.exception.ProviderUnavailableException;
 import com.example.hexagonal.contract.model.ProblemDto;
@@ -25,6 +26,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@UnitTest
 class ErrorResponseResolverTest {
 
     private final ErrorResponseResolver resolver =

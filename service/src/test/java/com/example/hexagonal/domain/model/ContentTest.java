@@ -1,9 +1,11 @@
 package com.example.hexagonal.domain.model;
 
+import com.example.hexagonal.test.tag.UnitTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@UnitTest
 class ContentTest {
 
     @Test

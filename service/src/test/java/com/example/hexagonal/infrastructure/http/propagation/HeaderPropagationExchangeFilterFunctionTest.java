@@ -1,5 +1,6 @@
 package com.example.hexagonal.infrastructure.http.propagation;
 
+import com.example.hexagonal.test.tag.UnitTest;
 import com.example.hexagonal.infrastructure.context.RequestContext;
 import com.example.hexagonal.infrastructure.context.RequestContextHeaders;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@UnitTest
 class HeaderPropagationExchangeFilterFunctionTest {
 
     private final HeaderPropagationProperties properties = new HeaderPropagationProperties(

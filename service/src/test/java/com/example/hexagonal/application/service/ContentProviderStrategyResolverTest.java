@@ -1,5 +1,6 @@
 package com.example.hexagonal.application.service;
 
+import com.example.hexagonal.test.tag.UnitTest;
 import com.example.hexagonal.domain.model.ContentProviderType;
 import org.junit.jupiter.api.Test;
 
@@ -9,6 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@UnitTest
 class ContentProviderStrategyResolverTest {
 
     @Test

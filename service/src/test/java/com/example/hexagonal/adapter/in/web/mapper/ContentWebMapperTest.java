@@ -1,5 +1,6 @@
 package com.example.hexagonal.adapter.in.web.mapper;
 
+import com.example.hexagonal.test.tag.UnitTest;
 import com.example.hexagonal.application.port.in.result.GetContentResult;
 import com.example.hexagonal.contract.model.ContentProviderDto;
 import com.example.hexagonal.contract.model.GetContentRequestDto;
@@ -8,6 +9,7 @@ import org.mapstruct.factory.Mappers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@UnitTest
 class ContentWebMapperTest {
 
     private final ContentWebMapper contentWebMapper = Mappers.getMapper(ContentWebMapper.class);

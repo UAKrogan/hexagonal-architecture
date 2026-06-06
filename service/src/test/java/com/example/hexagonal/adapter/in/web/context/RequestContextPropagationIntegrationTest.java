@@ -1,5 +1,6 @@
 package com.example.hexagonal.adapter.in.web.context;
 
+import com.example.hexagonal.test.tag.FunctionalTest;
 import com.example.hexagonal.infrastructure.context.RequestContext;
 import com.example.hexagonal.infrastructure.context.RequestContextHeaders;
 import org.junit.jupiter.api.AfterAll;
@@ -44,6 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
     }
 )
 @AutoConfigureWebTestClient
+@FunctionalTest
 class RequestContextPropagationIntegrationTest {
 
     private static final String CORRELATION_ID = "550e8400-e29b-41d4-a716-446655440000";

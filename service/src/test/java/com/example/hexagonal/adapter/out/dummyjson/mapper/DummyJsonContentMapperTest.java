@@ -1,11 +1,13 @@
 package com.example.hexagonal.adapter.out.dummyjson.mapper;
 
+import com.example.hexagonal.test.tag.UnitTest;
 import com.example.hexagonal.adapter.out.dummyjson.dto.DummyJsonContentResponse;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@UnitTest
 class DummyJsonContentMapperTest {
 
     private final DummyJsonContentMapper mapper = Mappers.getMapper(DummyJsonContentMapper.class);

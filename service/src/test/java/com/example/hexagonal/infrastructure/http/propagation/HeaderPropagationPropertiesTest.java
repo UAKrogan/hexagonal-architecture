@@ -1,5 +1,6 @@
 package com.example.hexagonal.infrastructure.http.propagation;
 
+import com.example.hexagonal.test.tag.UnitTest;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@UnitTest
 class HeaderPropagationPropertiesTest {
 
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();

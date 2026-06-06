@@ -1,5 +1,6 @@
 package com.example.hexagonal.infrastructure.context;
 
+import com.example.hexagonal.test.tag.UnitTest;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@UnitTest
 class RequestContextTest {
 
     @Test
