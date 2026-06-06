@@ -1,4 +1,4 @@
-### Get content V1
+### Get content V1 - success
 
 POST {{host}}/api/content
 Content-Type: application/json
@@ -9,3 +9,184 @@ x-correlation-id: {{$uuid}}
   "contentId": 1,
   "provider": "JSONPLACEHOLDER"
 }
+
+### Validation error - missing required body field: contentId
+
+POST {{host}}/api/content
+Content-Type: application/json
+x-api-version: 1
+x-correlation-id: {{$uuid}}
+
+{
+  "provider": "JSONPLACEHOLDER"
+}
+
+### Validation error - missing required body field: provider
+
+POST {{host}}/api/content
+Content-Type: application/json
+x-api-version: 1
+x-correlation-id: {{$uuid}}
+
+{
+  "contentId": 1
+}
+
+### Missing header - x-api-version
+
+POST {{host}}/api/content
+Content-Type: application/json
+x-correlation-id: {{$uuid}}
+
+{
+  "contentId": 1,
+  "provider": "JSONPLACEHOLDER"
+}
+
+### Missing header - x-correlation-id
+
+POST {{host}}/api/content
+Content-Type: application/json
+x-api-version: 1
+
+{
+  "contentId": 1,
+  "provider": "JSONPLACEHOLDER"
+}
+
+### Invalid header - x-correlation-id is not a UUID
+
+POST {{host}}/api/content
+Content-Type: application/json
+x-api-version: 1
+x-correlation-id: not-a-uuid
+
+{
+  "contentId": 1,
+  "provider": "JSONPLACEHOLDER"
+}
+
+### Invalid request body - empty body
+
+POST {{host}}/api/content
+Content-Type: application/json
+x-api-version: 1
+x-correlation-id: {{$uuid}}
+
+
+### Invalid JSON - malformed JSON syntax
+
+POST {{host}}/api/content
+Content-Type: application/json
+x-api-version: 1
+x-correlation-id: {{$uuid}}
+
+{
+  "contentId": 1,
+  "provider": "JSONPLACEHOLDER"
+
+### Invalid JSON - invalid enum value
+
+POST {{host}}/api/content
+Content-Type: application/json
+x-api-version: 1
+x-correlation-id: {{$uuid}}
+
+{
+  "contentId": 1,
+  "provider": "UNKNOWN"
+}
+
+### Unsupported media type
+
+POST {{host}}/api/content
+Content-Type: text/plain
+x-api-version: 1
+x-correlation-id: {{$uuid}}
+
+contentId=1&provider=JSONPLACEHOLDER
+
+### Method not allowed
+
+PUT {{host}}/api/content
+Content-Type: application/json
+x-api-version: 1
+x-correlation-id: {{$uuid}}
+
+{
+  "contentId": 1,
+  "provider": "JSONPLACEHOLDER"
+}
+
+### Route not found
+
+POST {{host}}/api/content/not-found
+Content-Type: application/json
+x-api-version: 1
+x-correlation-id: {{$uuid}}
+
+{
+  "contentId": 1,
+  "provider": "JSONPLACEHOLDER"
+}
+
+### Domain exception - content not found from JSONPlaceholder provider
+# Depends on upstream provider returning 404 for the selected id.
+
+POST {{host}}/api/content
+Content-Type: application/json
+x-api-version: 1
+x-correlation-id: {{$uuid}}
+
+{
+  "contentId": 999999999,
+  "provider": "JSONPLACEHOLDER"
+}
+
+### Domain exception - content not found from DummyJSON provider
+# Depends on upstream provider returning 404 for the selected id.
+
+POST {{host}}/api/content
+Content-Type: application/json
+x-api-version: 1
+x-correlation-id: {{$uuid}}
+
+{
+  "contentId": 999999999,
+  "provider": "DUMMYJSON"
+}
+
+### Application exception - provider unavailable
+# Covered by ProviderUnavailableException -> 502.
+# This requires the configured upstream provider to be unavailable or return a 5xx response.
+# The current public API has no deterministic request-only trigger for this case.
+
+POST {{host}}/api/content
+Content-Type: application/json
+x-api-version: 1
+x-correlation-id: {{$uuid}}
+
+{
+  "contentId": 1,
+  "provider": "JSONPLACEHOLDER"
+}
+
+### Business exception
+# Covered by BusinessException -> 400.
+# The current public API has no use case that throws BusinessException, so there is no deterministic request-only example.
+
+### Application exception - generic
+# Covered by ApplicationException -> 400.
+# The current public API has no use case that throws generic ApplicationException, so there is no deterministic request-only example.
+
+### Domain exception - generic
+# Covered by DomainException -> 400.
+# The current public API currently exposes ContentNotFoundException as the concrete domain exception example above.
+
+### Missing request parameter
+# Covered by MissingRequestValueException -> 400.
+# The current OpenAPI contract has required headers and request body fields, but no required query/path request parameters.
+
+### Unexpected error
+# Covered by fallback exception mapping -> 500.
+# The current public API has no deterministic request-only trigger without adding a test-only endpoint or forcing an unhandled runtime failure.

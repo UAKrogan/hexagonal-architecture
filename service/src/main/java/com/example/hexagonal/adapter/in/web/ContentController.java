@@ -52,14 +52,6 @@ public class ContentController implements ContentApi {
                         response.getSource()
                     );
                 }
-            })
-            .doOnError(ex ->
-                log.error(
-                    "Failed to process content request: apiVersion={}, correlationId={}",
-                    xApiVersion,
-                    xCorrelationId,
-                    ex
-                )
-            );
+            });
     }
 }

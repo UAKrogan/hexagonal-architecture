@@ -1,12 +1,15 @@
 package com.example.hexagonal.adapter.out.jsonplaceholder.client;
 
 import com.example.hexagonal.adapter.out.jsonplaceholder.dto.JsonPlaceholderContentResponse;
+import com.example.hexagonal.application.exception.ProviderUnavailableException;
 import com.example.hexagonal.domain.exception.ContentNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -24,7 +27,15 @@ public class JsonPlaceholderClient {
                 status -> status == HttpStatus.NOT_FOUND,
                 response -> Mono.error(new ContentNotFoundException("Content not found for id: " + contentId))
             )
+            .onStatus(
+                HttpStatusCode::is5xxServerError,
+                response -> Mono.error(new ProviderUnavailableException("JSONPlaceholder provider is unavailable"))
+            )
             .bodyToMono(JsonPlaceholderContentResponse.class)
+            .onErrorMap(
+                WebClientRequestException.class,
+                ex -> new ProviderUnavailableException("JSONPlaceholder provider is unavailable", ex)
+            )
             .doOnSubscribe(subscription ->
                 log.info(
                     "Calling JSONPlaceholder API: contentId={}",

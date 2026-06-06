@@ -14,6 +14,27 @@ components:
           schema:
             $ref: "#/components/schemas/Problem"
 
+    MethodNotAllowed_405:
+      description: The HTTP method is not supported for this endpoint.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+
+    UnsupportedMediaType_415:
+      description: The request media type is not supported.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+
+    BadGateway_502:
+      description: The upstream content provider is unavailable.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+
     InternalServerError_500:
       description: An unexpected error occurred on the server while processing the request.
       content:

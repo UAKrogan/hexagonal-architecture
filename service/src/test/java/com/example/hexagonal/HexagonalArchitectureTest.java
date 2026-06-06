@@ -310,6 +310,7 @@ public class HexagonalArchitectureTest {
                 "..application.service..",
                 "..application.port.in..",
                 "..application.port.out..",
+                "..application.exception..",
                 "..application.config.."
             )
             .because("Application layer classes should be organized in appropriate " +
@@ -388,4 +389,3 @@ public class HexagonalArchitectureTest {
             .because("Adapters must be Spring-managed beans to be injected as " +
                 "implementations of output ports");
 }
-
