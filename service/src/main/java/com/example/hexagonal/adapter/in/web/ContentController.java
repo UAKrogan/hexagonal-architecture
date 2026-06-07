@@ -2,6 +2,8 @@ package com.example.hexagonal.adapter.in.web;
 
 import com.example.hexagonal.adapter.in.web.mapper.ContentWebMapper;
 import com.example.hexagonal.application.port.in.GetContentUseCase;
+import com.example.hexagonal.application.port.in.command.GetContentCommand;
+import com.example.hexagonal.application.port.in.result.GetContentResult;
 import com.example.hexagonal.contract.api.ContentApi;
 import com.example.hexagonal.contract.model.GetContentRequestDto;
 import com.example.hexagonal.contract.model.GetContentResponseDto;
@@ -38,7 +40,7 @@ public class ContentController implements ContentApi {
                 )
             )
             .map(contentWebMapper::toCommand)
-            .flatMap(getContentUseCase::getContent)
+            .flatMap(this::getContent)
             .map(contentWebMapper::toDto)
             .doOnSuccess(response -> {
 
@@ -53,5 +55,24 @@ public class ContentController implements ContentApi {
                     );
                 }
             });
+    }
+
+    private Mono<GetContentResult> getContent(GetContentCommand command) {
+        return getContentUseCase.getContent(command)
+            .doOnNext(result ->
+                log.info(
+                    "Successfully mapped content result: id={}, source={}",
+                    result.id(),
+                    result.source()
+                )
+            )
+            .doOnError(ex ->
+                log.error(
+                    "Failed to execute get content use case: contentId={}, provider={}",
+                    command.contentId(),
+                    command.provider(),
+                    ex
+                )
+            );
     }
 }

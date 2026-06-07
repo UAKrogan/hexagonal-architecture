@@ -196,6 +196,14 @@ public class HexagonalArchitectureTest {
             )
             .because("Command and result models should remain simple application data contracts");
 
+    @ArchTest
+    static final ArchRule APPLICATION_SHOULD_NOT_DEPEND_ON_LOGGING_FRAMEWORKS =
+        noClasses()
+            .that().resideInAPackage("..application..")
+            .should().dependOnClassesThat()
+            .resideInAnyPackage("org.slf4j..", "ch.qos.logback..")
+            .because("Operational logging belongs in adapters and infrastructure, not application use-case logic");
+
     // ==============================================
     // Naming and Shape Rules
     // ==============================================
