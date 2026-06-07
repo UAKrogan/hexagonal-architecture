@@ -51,6 +51,21 @@ class RequestContextFactoryTest {
     }
 
     @Test
+    void shouldGenerateCorrelationIdWhenHeaderAndFallbackAreMissing() {
+        RequestContext requestContext = requestContextFactory.create(
+            Map.of(),
+            List.of(RequestContextHeaders.CORRELATION_ID, RequestContextHeaders.API_VERSION),
+            null
+        );
+
+        assertThat(requestContext.correlationId()).isNotBlank();
+        assertThat(requestContext.apiVersion()).isEqualTo("unknown");
+        assertThat(requestContext.headers())
+            .containsEntry(RequestContextHeaders.CORRELATION_ID, requestContext.correlationId())
+            .containsEntry(RequestContextHeaders.API_VERSION, "unknown");
+    }
+
+    @Test
     void shouldNormalizeHeaderNamesForInboundAdapters() {
         RequestContext requestContext = requestContextFactory.create(
             Map.of(
@@ -71,7 +86,7 @@ class RequestContextFactoryTest {
     }
 
     @Test
-    void shouldKeepBlankAllowedHeaderValueInPropagatedHeaders() {
+    void shouldUseResolvedValuesForBlankRequiredHeadersAndKeepBlankAllowedHeaderValue() {
         RequestContext requestContext = requestContextFactory.create(
             Map.of(
                 RequestContextHeaders.CORRELATION_ID, " ",
@@ -85,8 +100,8 @@ class RequestContextFactoryTest {
         assertThat(requestContext.correlationId()).isEqualTo("fallback-correlation-id");
         assertThat(requestContext.apiVersion()).isEqualTo("unknown");
         assertThat(requestContext.headers())
-            .containsEntry(RequestContextHeaders.CORRELATION_ID, " ")
-            .containsEntry(RequestContextHeaders.API_VERSION, " ")
+            .containsEntry(RequestContextHeaders.CORRELATION_ID, "fallback-correlation-id")
+            .containsEntry(RequestContextHeaders.API_VERSION, "unknown")
             .containsEntry("x-allowed", " ");
     }
 }

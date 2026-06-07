@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 @Component
 public class RequestContextFactory {
@@ -21,7 +22,7 @@ public class RequestContextFactory {
         String correlationId = headerOrDefault(
             normalizedInboundHeaders,
             RequestContextHeaders.CORRELATION_ID,
-            fallbackCorrelationId
+            fallbackCorrelationId(fallbackCorrelationId)
         );
         String apiVersion = headerOrDefault(
             normalizedInboundHeaders,
@@ -33,8 +34,8 @@ public class RequestContextFactory {
             normalizedInboundHeaders,
             propagatedHeaderNames
         );
-        propagatedHeaders.putIfAbsent(RequestContextHeaders.CORRELATION_ID, correlationId);
-        propagatedHeaders.putIfAbsent(RequestContextHeaders.API_VERSION, apiVersion);
+        propagatedHeaders.put(RequestContextHeaders.CORRELATION_ID, correlationId);
+        propagatedHeaders.put(RequestContextHeaders.API_VERSION, apiVersion);
 
         return new RequestContext(correlationId, apiVersion, propagatedHeaders);
     }
@@ -78,6 +79,12 @@ public class RequestContextFactory {
     private String headerOrDefault(Map<String, String> headers, String headerName, String defaultValue) {
         String value = headers.get(headerName);
         return value == null || value.isBlank() ? defaultValue : value;
+    }
+
+    private String fallbackCorrelationId(String fallbackCorrelationId) {
+        return fallbackCorrelationId == null || fallbackCorrelationId.isBlank()
+            ? UUID.randomUUID().toString()
+            : fallbackCorrelationId;
     }
 
     private String normalize(String headerName) {

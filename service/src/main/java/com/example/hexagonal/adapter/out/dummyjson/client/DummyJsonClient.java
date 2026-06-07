@@ -5,6 +5,7 @@ import com.example.hexagonal.application.exception.ProviderUnavailableException;
 import com.example.hexagonal.domain.exception.ContentNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
@@ -31,10 +32,18 @@ public class DummyJsonClient {
                 HttpStatusCode::is5xxServerError,
                 response -> Mono.error(new ProviderUnavailableException("DummyJSON provider is unavailable"))
             )
+            .onStatus(
+                HttpStatusCode::isError,
+                response -> Mono.error(new ProviderUnavailableException("DummyJSON provider is unavailable"))
+            )
             .bodyToMono(DummyJsonContentResponse.class)
             .onErrorMap(
                 WebClientRequestException.class,
                 ex -> new ProviderUnavailableException("DummyJSON provider is unavailable", ex)
+            )
+            .onErrorMap(
+                DecodingException.class,
+                ex -> new ProviderUnavailableException("DummyJSON provider returned an invalid response", ex)
             )
             .doOnSubscribe(subscription ->
                 log.info(
@@ -50,7 +59,7 @@ public class DummyJsonClient {
             )
             .doOnError(ex ->
                 log.error(
-                    "Failed to retrieve content from JSONPlaceholder: contentId={}",
+                    "Failed to retrieve content from DummyJSON: contentId={}",
                     contentId,
                     ex
                 )

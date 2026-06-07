@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.core.publisher.Mono;
@@ -31,10 +32,18 @@ public class JsonPlaceholderClient {
                 HttpStatusCode::is5xxServerError,
                 response -> Mono.error(new ProviderUnavailableException("JSONPlaceholder provider is unavailable"))
             )
+            .onStatus(
+                HttpStatusCode::isError,
+                response -> Mono.error(new ProviderUnavailableException("JSONPlaceholder provider is unavailable"))
+            )
             .bodyToMono(JsonPlaceholderContentResponse.class)
             .onErrorMap(
                 WebClientRequestException.class,
                 ex -> new ProviderUnavailableException("JSONPlaceholder provider is unavailable", ex)
+            )
+            .onErrorMap(
+                DecodingException.class,
+                ex -> new ProviderUnavailableException("JSONPlaceholder provider returned an invalid response", ex)
             )
             .doOnSubscribe(subscription ->
                 log.info(

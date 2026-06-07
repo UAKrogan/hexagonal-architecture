@@ -78,6 +78,30 @@ class DummyJsonClientTest {
             .verify();
     }
 
+    @Test
+    void shouldMapOtherProviderHttpErrorsToProviderUnavailableException() {
+        server = server(HttpStatus.TOO_MANY_REQUESTS.value(), "{}", new AtomicReference<>());
+        DummyJsonClient client = client();
+
+        StepVerifier.create(client.getContent(1L))
+            .expectErrorSatisfies(error -> assertThat(error)
+                .isInstanceOf(ProviderUnavailableException.class)
+                .hasMessage("DummyJSON provider is unavailable"))
+            .verify();
+    }
+
+    @Test
+    void shouldMapMalformedProviderResponseToProviderUnavailableException() {
+        server = server(HttpStatus.OK.value(), "not-json", new AtomicReference<>());
+        DummyJsonClient client = client();
+
+        StepVerifier.create(client.getContent(1L))
+            .expectErrorSatisfies(error -> assertThat(error)
+                .isInstanceOf(ProviderUnavailableException.class)
+                .hasMessage("DummyJSON provider returned an invalid response"))
+            .verify();
+    }
+
     private DisposableServer server(int status, String body, AtomicReference<String> requestedPath) {
         return HttpServer.create()
             .port(0)

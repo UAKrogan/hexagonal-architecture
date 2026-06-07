@@ -65,14 +65,6 @@ public class ContentController implements ContentApi {
                     result.id(),
                     result.source()
                 )
-            )
-            .doOnError(ex ->
-                log.error(
-                    "Failed to execute get content use case: contentId={}, provider={}",
-                    command.contentId(),
-                    command.provider(),
-                    ex
-                )
             );
     }
 }

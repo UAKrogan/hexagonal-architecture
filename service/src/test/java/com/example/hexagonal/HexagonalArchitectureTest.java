@@ -73,7 +73,8 @@ public class HexagonalArchitectureTest {
             .that().resideInAPackage("..adapter.in..")
             .should().dependOnClassesThat()
             .resideInAPackage("..adapter.out..")
-            .because("Inbound adapters must enter through application ports and must not call outbound adapters directly");
+            .because(
+                "Inbound adapters must enter through application ports and must not call outbound adapters directly");
 
     @ArchTest
     static final ArchRule ADAPTER_OUT_SHOULD_NOT_DEPEND_ON_ADAPTER_IN =
@@ -188,6 +189,14 @@ public class HexagonalArchitectureTest {
             .should().dependOnClassesThat()
             .resideInAnyPackage("jakarta.validation..", "javax.validation..")
             .because("Domain should express validation with domain rules, not framework annotations");
+
+    @ArchTest
+    static final ArchRule APPLICATION_SHOULD_NOT_DEPEND_ON_SPRING =
+        noClasses()
+            .that().resideInAPackage("..application..")
+            .should().dependOnClassesThat()
+            .resideInAPackage("org.springframework..")
+            .because("Application use cases and ports should be wired by infrastructure, not Spring annotations");
 
     @ArchTest
     static final ArchRule APPLICATION_PORTS_SHOULD_NOT_DEPEND_ON_SPRING =
@@ -327,6 +336,7 @@ public class HexagonalArchitectureTest {
         classes()
             .that().resideInAPackage("..infrastructure..")
             .should().resideInAnyPackage(
+                "..infrastructure.configuration..",
                 "..infrastructure.http..",
                 "..infrastructure.observability.."
             )

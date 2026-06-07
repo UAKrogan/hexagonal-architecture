@@ -78,6 +78,30 @@ class JsonPlaceholderClientTest {
             .verify();
     }
 
+    @Test
+    void shouldMapOtherProviderHttpErrorsToProviderUnavailableException() {
+        server = server(HttpStatus.TOO_MANY_REQUESTS.value(), "{}", new AtomicReference<>());
+        JsonPlaceholderClient client = client();
+
+        StepVerifier.create(client.getContent(1L))
+            .expectErrorSatisfies(error -> assertThat(error)
+                .isInstanceOf(ProviderUnavailableException.class)
+                .hasMessage("JSONPlaceholder provider is unavailable"))
+            .verify();
+    }
+
+    @Test
+    void shouldMapMalformedProviderResponseToProviderUnavailableException() {
+        server = server(HttpStatus.OK.value(), "not-json", new AtomicReference<>());
+        JsonPlaceholderClient client = client();
+
+        StepVerifier.create(client.getContent(1L))
+            .expectErrorSatisfies(error -> assertThat(error)
+                .isInstanceOf(ProviderUnavailableException.class)
+                .hasMessage("JSONPlaceholder provider returned an invalid response"))
+            .verify();
+    }
+
     private DisposableServer server(int status, String body, AtomicReference<String> requestedPath) {
         return HttpServer.create()
             .port(0)

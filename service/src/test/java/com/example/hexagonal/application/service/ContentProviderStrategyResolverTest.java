@@ -1,13 +1,14 @@
 package com.example.hexagonal.application.service;
 
-import com.example.hexagonal.test.tag.UnitTest;
 import com.example.hexagonal.application.port.out.ContentProviderStrategyPort;
 import com.example.hexagonal.domain.model.ContentProviderType;
+import com.example.hexagonal.test.tag.UnitTest;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -30,9 +31,11 @@ class ContentProviderStrategyResolverTest {
     }
 
     @Test
-    void shouldReturnNullWhenStrategyIsNotRegistered() {
-        ContentProviderStrategyResolver resolver = new ContentProviderStrategyResolver(List.of());
-
-        assertThat(resolver.resolve(ContentProviderType.JSONPLACEHOLDER)).isNull();
+    void shouldFailFastWhenStrategyIsNotRegistered() {
+        assertThatThrownBy(() -> new ContentProviderStrategyResolver(List.of()))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Missing content provider strategies")
+            .hasMessageContaining(ContentProviderType.JSONPLACEHOLDER.name())
+            .hasMessageContaining(ContentProviderType.DUMMYJSON.name());
     }
 }

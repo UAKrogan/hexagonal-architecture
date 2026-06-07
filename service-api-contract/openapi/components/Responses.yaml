@@ -86,5 +86,5 @@ components:
           description: >
             A human-readable explanation of why validation failed,
             including any constraint specifics
-            (e.g. “must be at least 8 characters long” or
-            “must be a valid ISO 8601 date”).
+            (e.g. "must be at least 8 characters long" or
+            "must be a valid ISO 8601 date").

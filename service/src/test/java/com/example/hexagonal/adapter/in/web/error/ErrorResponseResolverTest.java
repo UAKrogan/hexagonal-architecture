@@ -1,6 +1,6 @@
 package com.example.hexagonal.adapter.in.web.error;
 
-import com.example.hexagonal.test.tag.UnitTest;
+import com.example.hexagonal.application.error.ExceptionToErrorCodeResolver;
 import com.example.hexagonal.application.exception.ApplicationException;
 import com.example.hexagonal.application.exception.ProviderUnavailableException;
 import com.example.hexagonal.contract.model.ProblemDto;
@@ -8,6 +8,7 @@ import com.example.hexagonal.contract.model.ValidationProblemDto;
 import com.example.hexagonal.domain.exception.BusinessException;
 import com.example.hexagonal.domain.exception.ContentNotFoundException;
 import com.example.hexagonal.domain.exception.DomainException;
+import com.example.hexagonal.test.tag.UnitTest;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.springframework.http.HttpMethod;
@@ -32,13 +33,14 @@ class ErrorResponseResolverTest {
     private final ErrorResponseResolver resolver =
         new ErrorResponseResolver(
             Mappers.getMapper(ProblemResponseMapper.class),
-            new WebExceptionToErrorCodeResolver(),
+            new WebExceptionToErrorCodeResolver(new ExceptionToErrorCodeResolver()),
             new ValidationErrorExtractor(Mappers.getMapper(ProblemResponseMapper.class))
         );
 
     @Test
     void shouldMapBusinessExceptionToBadRequestValidationProblem() {
-        ErrorResponse response = resolver.toErrorResponse(new BusinessException("business failed"), request("/api/content"));
+        ErrorResponse response =
+            resolver.toErrorResponse(new BusinessException("business failed"), request("/api/content"));
 
         assertThat(response.status()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.expected()).isTrue();
@@ -47,7 +49,8 @@ class ErrorResponseResolverTest {
 
     @Test
     void shouldMapApplicationExceptionToBadRequestValidationProblem() {
-        ErrorResponse response = resolver.toErrorResponse(new ApplicationException("application failed"), request("/api/content"));
+        ErrorResponse response =
+            resolver.toErrorResponse(new ApplicationException("application failed"), request("/api/content"));
 
         assertThat(response.status()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertValidationProblem(response.body(), "urn:problem:hexagonal:application-error", "application failed");
@@ -63,7 +66,8 @@ class ErrorResponseResolverTest {
 
     @Test
     void shouldMapContentNotFoundExceptionToNotFoundProblem() {
-        ErrorResponse response = resolver.toErrorResponse(new ContentNotFoundException("content missing"), request("/api/content"));
+        ErrorResponse response =
+            resolver.toErrorResponse(new ContentNotFoundException("content missing"), request("/api/content"));
 
         assertThat(response.status()).isEqualTo(HttpStatus.NOT_FOUND);
         assertProblem(response.body(), "urn:problem:hexagonal:content-not-found", "content missing");

@@ -3,6 +3,7 @@ package com.example.hexagonal.adapter.in.web.error;
 import com.example.hexagonal.application.error.ErrorCode;
 import com.example.hexagonal.application.error.ExceptionToErrorCodeResolver;
 import com.example.hexagonal.contract.api.ContentApi;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -17,12 +18,12 @@ import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 @Component
+@RequiredArgsConstructor
 class WebExceptionToErrorCodeResolver {
 
     private static final String API_VERSION_HEADER = "x-api-version";
 
-    private final ExceptionToErrorCodeResolver exceptionToErrorCodeResolver =
-        new ExceptionToErrorCodeResolver();
+    private final ExceptionToErrorCodeResolver exceptionToErrorCodeResolver;
 
     ErrorCode resolve(Throwable error, ServerRequest request) {
         if (isMissingApiVersionHeader(error, request)) {
