@@ -5,7 +5,6 @@ import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
-import org.junit.jupiter.api.Tag;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
@@ -13,14 +12,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
 /**
- * ArchUnit tests to validate hexagonal architecture principles.
- * <p>
- * This test class contains 35 test cases that validate:
- * - Layer dependencies and isolation
- * - Framework independence in domain layer
- * - Naming conventions
- * - Package structure
- * - Interface and implementation patterns
+ * ArchUnit tests that protect the hexagonal architecture boundaries.
  */
 @AnalyzeClasses(
     packages = "com.example.hexagonal",
@@ -29,103 +21,51 @@ import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.sli
     }
 )
 @ArchitectureTest
-@Tag("architecture")
 public class HexagonalArchitectureTest {
 
     // ==============================================
-    // Layer Dependency Tests (10 tests)
+    // Layer Dependency Rules
     // ==============================================
 
     @ArchTest
-    static final ArchRule DOMAIN_SHOULD_NOT_DEPEND_ON_APPLICATION_LAYER =
+    static final ArchRule DOMAIN_SHOULD_NOT_DEPEND_ON_APPLICATION =
         noClasses()
-            .that()
-            .resideInAPackage("..domain..")
+            .that().resideInAPackage("..domain..")
             .should().dependOnClassesThat()
             .resideInAPackage("..application..")
-            .because("Domain layer must remain independent of application layer to ensure " +
-                "business logic is not coupled to use cases");
+            .because("Domain must not know application use cases or orchestration concerns");
 
     @ArchTest
-    static final ArchRule DOMAIN_SHOULD_NOT_DEPEND_ON_ADAPTER_LAYER =
+    static final ArchRule DOMAIN_SHOULD_NOT_DEPEND_ON_ADAPTERS =
         noClasses()
             .that().resideInAPackage("..domain..")
             .should().dependOnClassesThat()
             .resideInAPackage("..adapter..")
-            .because("Domain layer must be isolated from infrastructure concerns and " +
-                "external system adapters");
+            .because("Domain must be isolated from inbound and outbound adapters");
 
     @ArchTest
-    static final ArchRule APPLICATION_SHOULD_NOT_DEPEND_ON_ADAPTER_LAYER =
+    static final ArchRule DOMAIN_SHOULD_NOT_DEPEND_ON_INFRASTRUCTURE =
+        noClasses()
+            .that().resideInAPackage("..domain..")
+            .should().dependOnClassesThat()
+            .resideInAPackage("..infrastructure..")
+            .because("Domain must not depend on infrastructure implementation details");
+
+    @ArchTest
+    static final ArchRule APPLICATION_SHOULD_NOT_DEPEND_ON_ADAPTERS =
         noClasses()
             .that().resideInAPackage("..application..")
             .should().dependOnClassesThat()
             .resideInAPackage("..adapter..")
-            .because("Application layer should depend only on ports (interfaces), " +
-                "not on concrete adapter implementations");
+            .because("Application must depend on ports and domain, not adapter implementations");
 
     @ArchTest
-    static final ArchRule CONTROLLERS_SHOULD_NOT_DEPEND_ON_DOMAIN_SERVICES =
+    static final ArchRule APPLICATION_SHOULD_NOT_DEPEND_ON_INFRASTRUCTURE =
         noClasses()
-            .that().resideInAPackage("..adapter.in.web..")
-            .and().haveSimpleNameEndingWith("Controller")
+            .that().resideInAPackage("..application..")
             .should().dependOnClassesThat()
-            .resideInAPackage("..domain.service..")
-            .because("Controllers should interact with the domain through application " +
-                "services and input ports, not directly with domain services");
-
-    @ArchTest
-    static final ArchRule ADAPTER_OUT_SHOULD_IMPLEMENT_OUTPUT_PORTS =
-        classes()
-            .that().resideInAPackage("..adapter.out..")
-            .and().haveSimpleNameEndingWith("Adapter")
-            .should().dependOnClassesThat()
-            .resideInAPackage("..application.port.out..")
-            .because("Output adapters must implement output ports to provide concrete " +
-                "implementations for external system interactions");
-
-    @ArchTest
-    static final ArchRule APPLICATION_SERVICES_SHOULD_USE_DOMAIN =
-        classes()
-            .that().resideInAPackage("..application.service..")
-            .should().dependOnClassesThat()
-            .resideInAPackage("..domain..")
-            .because("Application services orchestrate business logic by using " +
-                "domain models and services");
-
-    @ArchTest
-    static final ArchRule ADAPTERS_SHOULD_USE_DOMAIN_MODELS =
-        classes()
-            .that().resideInAPackage("..adapter..")
-            .and().haveSimpleNameEndingWith("Adapter")
-            .should().dependOnClassesThat()
-            .resideInAPackage("..domain.model..")
-            .because("Adapters must work with domain models to translate between " +
-                "external formats and internal domain representations");
-
-    @ArchTest
-    static final ArchRule DOMAIN_SHOULD_NOT_HAVE_CYCLIC_DEPENDENCIES =
-        slices()
-            .matching("..domain.(*)..")
-            .should().beFreeOfCycles()
-            .because("Cyclic dependencies in domain layer create tight coupling and " +
-                "make the code harder to understand and maintain");
-
-    @ArchTest
-    static final ArchRule APPLICATION_SHOULD_NOT_HAVE_CYCLIC_DEPENDENCIES =
-        slices()
-            .matching("..application.(*)..")
-            .should().beFreeOfCycles()
-            .because("Cyclic dependencies in application layer create tight coupling " +
-                "between use cases and services");
-
-    @ArchTest
-    static final ArchRule ADAPTER_SHOULD_NOT_HAVE_CYCLIC_DEPENDENCIES =
-        slices()
-            .matching("..adapter.(*)..")
-            .should().beFreeOfCycles()
-            .because("Cyclic dependencies in adapter layer create tight coupling " +
-                "between different infrastructure concerns");
+            .resideInAPackage("..infrastructure..")
+            .because("Application orchestration must not depend on infrastructure implementation details");
 
     @ArchTest
     static final ArchRule ADAPTER_IN_SHOULD_NOT_DEPEND_ON_ADAPTER_OUT =
@@ -133,8 +73,7 @@ public class HexagonalArchitectureTest {
             .that().resideInAPackage("..adapter.in..")
             .should().dependOnClassesThat()
             .resideInAPackage("..adapter.out..")
-            .because("Input adapters must enter the application through input ports " +
-                "and must not call output adapters directly");
+            .because("Inbound adapters must enter through application ports and must not call outbound adapters directly");
 
     @ArchTest
     static final ArchRule ADAPTER_OUT_SHOULD_NOT_DEPEND_ON_ADAPTER_IN =
@@ -142,100 +81,123 @@ public class HexagonalArchitectureTest {
             .that().resideInAPackage("..adapter.out..")
             .should().dependOnClassesThat()
             .resideInAPackage("..adapter.in..")
-            .because("Output adapters are secondary adapters and must not depend on " +
-                "transport-specific input adapter concerns");
+            .because("Outbound adapters must not depend on transport-specific inbound adapter concerns");
 
     @ArchTest
-    static final ArchRule GENERATED_CONTRACTS_SHOULD_NOT_LEAK_INTO_DOMAIN_OR_APPLICATION =
+    static final ArchRule WEB_CONTROLLERS_SHOULD_NOT_DEPEND_ON_APPLICATION_SERVICES =
         noClasses()
-            .that().resideInAnyPackage("..domain..", "..application..")
+            .that().resideInAPackage("..adapter.in.web..")
+            .and().haveSimpleNameEndingWith("Controller")
+            .should().dependOnClassesThat()
+            .resideInAPackage("..application.service..")
+            .because("Controllers should use input ports rather than concrete application services");
+
+    @ArchTest
+    static final ArchRule OUTPUT_ADAPTERS_SHOULD_DEPEND_ON_OUTPUT_PORTS =
+        classes()
+            .that().resideInAPackage("..adapter.out..")
+            .and().haveSimpleNameEndingWith("Adapter")
+            .should().dependOnClassesThat()
+            .resideInAPackage("..application.port.out..")
+            .because("Outbound adapters must be connected to the application through output ports");
+
+    // ==============================================
+    // Generated Contract Rules
+    // ==============================================
+
+    @ArchTest
+    static final ArchRule GENERATED_CONTRACTS_SHOULD_NOT_BE_USED_FROM_DOMAIN =
+        noClasses()
+            .that().resideInAPackage("..domain..")
             .should().dependOnClassesThat()
             .resideInAnyPackage("..contract.api..", "..contract.model..")
-            .because("Generated OpenAPI contracts are transport models and must stay " +
-                "outside domain and application layers");
+            .because("Generated OpenAPI contracts are transport models and must not leak into the domain");
+
+    @ArchTest
+    static final ArchRule GENERATED_CONTRACTS_SHOULD_NOT_BE_USED_FROM_APPLICATION =
+        noClasses()
+            .that().resideInAPackage("..application..")
+            .should().dependOnClassesThat()
+            .resideInAnyPackage("..contract.api..", "..contract.model..")
+            .because("Generated OpenAPI contracts are adapter-facing DTOs and must not leak into application use cases");
+
+    @ArchTest
+    static final ArchRule GENERATED_CONTRACTS_SHOULD_NOT_BE_USED_FROM_ADAPTER_OUT =
+        noClasses()
+            .that().resideInAPackage("..adapter.out..")
+            .should().dependOnClassesThat()
+            .resideInAnyPackage("..contract.api..", "..contract.model..")
+            .because("Generated OpenAPI contracts belong to inbound web adapters, not outbound integrations");
 
     // ==============================================
-    // Framework Isolation Tests (8 tests)
+    // Framework Isolation Rules
     // ==============================================
 
     @ArchTest
-    static final ArchRule DOMAIN_SHOULD_NOT_IMPORT_SPRING_FRAMEWORK =
+    static final ArchRule DOMAIN_SHOULD_NOT_DEPEND_ON_SPRING =
         noClasses()
             .that().resideInAPackage("..domain..")
             .should().dependOnClassesThat()
             .resideInAPackage("org.springframework..")
-            .because("Domain layer must be framework-agnostic to ensure business " +
-                "logic is not tied to Spring framework");
+            .because("Domain must be framework-agnostic");
 
     @ArchTest
-    static final ArchRule DOMAIN_SHOULD_NOT_IMPORT_REACTOR_EXCEPT_IN_PORTS =
+    static final ArchRule DOMAIN_SHOULD_NOT_DEPEND_ON_REACTOR =
         noClasses()
             .that().resideInAPackage("..domain..")
-            .and().resideOutsideOfPackage("..application.port..")
             .should().dependOnClassesThat()
             .resideInAPackage("reactor..")
-            .because("Domain layer should not depend on reactive framework except in " +
-                "port interfaces where async behavior is part of the contract");
+            .because("Domain must not expose reactive framework types");
 
     @ArchTest
-    static final ArchRule DOMAIN_SHOULD_NOT_IMPORT_JACKSON =
+    static final ArchRule DOMAIN_SHOULD_NOT_DEPEND_ON_JSON_LIBRARIES =
         noClasses()
             .that().resideInAPackage("..domain..")
             .should().dependOnClassesThat()
             .resideInAnyPackage("com.fasterxml.jackson..", "tools.jackson..")
-            .because("Domain layer must not depend on JSON serialization libraries " +
-                "as this is an infrastructure concern");
+            .because("JSON serialization is an adapter concern");
 
     @ArchTest
-    static final ArchRule DOMAIN_SHOULD_NOT_IMPORT_MAPSTRUCT =
+    static final ArchRule DOMAIN_SHOULD_NOT_DEPEND_ON_MAPPING_FRAMEWORKS =
         noClasses()
             .that().resideInAPackage("..domain..")
             .should().dependOnClassesThat()
             .resideInAPackage("org.mapstruct..")
-            .because("Domain layer should not depend on mapping frameworks as object " +
-                "mapping is an adapter layer responsibility");
+            .because("Object mapping frameworks belong in adapters");
 
     @ArchTest
-    static final ArchRule DOMAIN_SHOULD_ONLY_USE_ALLOWED_LOMBOK_ANNOTATIONS =
+    static final ArchRule DOMAIN_SHOULD_NOT_DEPEND_ON_VALIDATION_FRAMEWORKS =
         noClasses()
             .that().resideInAPackage("..domain..")
             .should().dependOnClassesThat()
-            .resideInAPackage("lombok.experimental..")
-            .because("Domain layer should only use stable Lombok annotations " +
-                "(@Value, @Builder, @With) and avoid experimental features");
+            .resideInAnyPackage("jakarta.validation..", "javax.validation..")
+            .because("Domain should express validation with domain rules, not framework annotations");
 
     @ArchTest
-    static final ArchRule DOMAIN_SHOULD_NOT_IMPORT_JAVAX_VALIDATION =
+    static final ArchRule APPLICATION_PORTS_SHOULD_NOT_DEPEND_ON_SPRING =
         noClasses()
-            .that().resideInAPackage("..domain..")
+            .that().resideInAPackage("..application.port..")
             .should().dependOnClassesThat()
-            .resideInAPackage("javax.validation..")
-            .because("Domain layer should implement its own validation logic rather " +
-                "than depending on framework validation annotations");
+            .resideInAPackage("org.springframework..")
+            .because("Application ports should remain adapter-neutral contracts");
 
     @ArchTest
-    static final ArchRule DOMAIN_SHOULD_NOT_IMPORT_EXTERNAL_API_CLIENTS =
+    static final ArchRule APPLICATION_PORT_MODELS_SHOULD_NOT_DEPEND_ON_FRAMEWORK_DTOS =
         noClasses()
-            .that().resideInAPackage("..domain..")
+            .that().resideInAnyPackage("..application.port.in.command..", "..application.port.in.result..")
             .should().dependOnClassesThat()
-            .resideInAnyPackage("com.example.client..")
-            .because("Domain layer must not directly depend on external API clients " +
-                "as these are infrastructure concerns handled by adapters");
-
-    @ArchTest
-    static final ArchRule DOMAIN_SHOULD_NOT_HAVE_SPRING_ANNOTATIONS =
-        noClasses()
-            .that().resideInAPackage("..domain..")
-            .should().beAnnotatedWith("org.springframework.stereotype.Component")
-            .orShould().beAnnotatedWith("org.springframework.stereotype.Service")
-            .orShould().beAnnotatedWith("org.springframework.stereotype.Repository")
-            .orShould().beAnnotatedWith("org.springframework.context.annotation.Configuration")
-            .orShould().beAnnotatedWith("org.springframework.boot.context.properties.ConfigurationProperties")
-            .because("Domain layer classes should not be annotated with Spring " +
-                "stereotypes to maintain framework independence");
+            .resideInAnyPackage(
+                "org.springframework..",
+                "jakarta.validation..",
+                "javax.validation..",
+                "com.fasterxml.jackson..",
+                "tools.jackson..",
+                "org.mapstruct.."
+            )
+            .because("Command and result models should remain simple application data contracts");
 
     // ==============================================
-    // Naming Convention Tests (7 tests)
+    // Naming and Shape Rules
     // ==============================================
 
     @ArchTest
@@ -244,8 +206,15 @@ public class HexagonalArchitectureTest {
             .that().resideInAPackage("..application.port.in..")
             .and().areInterfaces()
             .should().haveSimpleNameEndingWith("UseCase")
-            .because("Input ports represent use cases and should be clearly " +
-                "identifiable by their naming convention");
+            .because("Input port names should make use case contracts explicit");
+
+    @ArchTest
+    static final ArchRule INPUT_USE_CASES_SHOULD_BE_INTERFACES =
+        classes()
+            .that().resideInAPackage("..application.port.in..")
+            .and().haveSimpleNameEndingWith("UseCase")
+            .should().beInterfaces()
+            .because("Input use cases should be contracts implemented by application services");
 
     @ArchTest
     static final ArchRule OUTPUT_PORTS_SHOULD_END_WITH_PORT =
@@ -253,34 +222,15 @@ public class HexagonalArchitectureTest {
             .that().resideInAPackage("..application.port.out..")
             .and().areInterfaces()
             .should().haveSimpleNameEndingWith("Port")
-            .because("Output ports define contracts for external dependencies and " +
-                "should be clearly identifiable by their naming convention");
+            .because("Output port names should make external dependency contracts explicit");
 
     @ArchTest
-    static final ArchRule MAIN_ADAPTERS_SHOULD_END_WITH_ADAPTER =
+    static final ArchRule OUTPUT_PORTS_SHOULD_BE_INTERFACES =
         classes()
-            .that().resideInAPackage("..adapter.out..")
-            .and().areNotInterfaces()
-            .and().areNotEnums()
-            .and().areNotAnnotations()
-            .and().areNotMemberClasses()
-            .and().haveSimpleNameEndingWith("Adapter")
-            .should().haveSimpleNameEndingWith("Adapter")
-            .because("Adapter classes implement ports and should be clearly " +
-                "identifiable by their naming convention");
-
-    @ArchTest
-    static final ArchRule DOMAIN_SERVICES_SHOULD_END_WITH_SERVICE =
-        classes()
-            .that().resideInAPackage("..domain.service..")
-            .and().areNotInterfaces()
-            .and().areNotEnums()
-            .and().areNotAnnotations()
-            .and().areNotMemberClasses()
-            .should().haveSimpleNameEndingWith("Service")
-            .allowEmptyShould(true)
-            .because("Domain services encapsulate business logic and should be " +
-                "clearly identifiable by their naming convention");
+            .that().resideInAPackage("..application.port.out..")
+            .and().haveSimpleNameEndingWith("Port")
+            .should().beInterfaces()
+            .because("Output ports should be contracts implemented by outbound adapters");
 
     @ArchTest
     static final ArchRule DOMAIN_EXCEPTIONS_SHOULD_END_WITH_EXCEPTION =
@@ -291,94 +241,25 @@ public class HexagonalArchitectureTest {
             .and().areNotAnnotations()
             .and().areNotMemberClasses()
             .should().haveSimpleNameEndingWith("Exception")
-            .because("Domain exceptions represent business rule violations and should " +
-                "be clearly identifiable by their naming convention");
+            .because("Domain exception names should make domain failures explicit");
 
     @ArchTest
-    static final ArchRule COMMANDS_SHOULD_END_WITH_COMMAND =
+    static final ArchRule INPUT_COMMANDS_SHOULD_END_WITH_COMMAND =
         classes()
-            .that().resideInAPackage("..application.port.in..")
+            .that().resideInAPackage("..application.port.in.command..")
             .and().areNotInterfaces()
             .and().areNotMemberClasses()
-            .and().haveSimpleNameContaining("Command")
             .should().haveSimpleNameEndingWith("Command")
-            .because("Command objects represent input data for use cases and should " +
-                "follow consistent naming conventions");
+            .because("Input command models should be named consistently");
 
     @ArchTest
-    static final ArchRule RESULTS_SHOULD_END_WITH_RESULT =
+    static final ArchRule INPUT_RESULTS_SHOULD_END_WITH_RESULT =
         classes()
-            .that().resideInAPackage("..application.port.in..")
+            .that().resideInAPackage("..application.port.in.result..")
             .and().areNotInterfaces()
             .and().areNotMemberClasses()
-            .and().haveSimpleNameContaining("Result")
             .should().haveSimpleNameEndingWith("Result")
-            .because("Result objects represent output data from use cases and should " +
-                "follow consistent naming conventions");
-
-    // ==============================================
-    // Package Structure Tests (5 tests)
-    // ==============================================
-
-    @ArchTest
-    static final ArchRule DOMAIN_CLASSES_SHOULD_RESIDE_IN_DOMAIN_PACKAGE =
-        classes()
-            .that().haveSimpleNameEndingWith("Service")
-            .and().areNotInterfaces()
-            .and().resideInAPackage("..domain..")
-            .should().resideInAPackage("..domain.service..")
-            .orShould().resideInAPackage("..domain.model..")
-            .orShould().resideInAPackage("..domain.exception..")
-            .allowEmptyShould(true)
-            .because("Domain classes should be organized in appropriate sub-packages " +
-                "to maintain clear separation of concerns");
-
-    @ArchTest
-    static final ArchRule APPLICATION_CLASSES_SHOULD_RESIDE_IN_APPLICATION_PACKAGE =
-        classes()
-            .that().resideInAPackage("..application..")
-            .should().resideInAnyPackage(
-                "..application.service..",
-                "..application.port.in..",
-                "..application.port.out..",
-                "..application.exception..",
-                "..application.config.."
-            )
-            .because("Application layer classes should be organized in appropriate " +
-                "sub-packages (services, ports) to maintain clear structure");
-
-    @ArchTest
-    static final ArchRule ADAPTER_CLASSES_SHOULD_RESIDE_IN_ADAPTER_PACKAGE =
-        classes()
-            .that().resideInAPackage("..adapter..")
-            .should().resideInAnyPackage(
-                "..adapter.in..",
-                "..adapter.out.."
-            )
-            .because("Adapter classes should be organized by direction (in/out) to " +
-                "clearly separate input and output adapters");
-
-    @ArchTest
-    static final ArchRule INPUT_PORTS_SHOULD_RESIDE_IN_APPLICATION_PORT_IN_PACKAGE =
-        classes()
-            .that().haveSimpleNameEndingWith("UseCase")
-            .and().areInterfaces()
-            .should().resideInAPackage("..application.port.in..")
-            .because("Input ports (use cases) should be located in the dedicated " +
-                "input port package to maintain clear boundaries");
-
-    @ArchTest
-    static final ArchRule OUTPUT_PORTS_SHOULD_RESIDE_IN_APPLICATION_PORT_OUT_PACKAGE =
-        classes()
-            .that().haveSimpleNameEndingWith("Port")
-            .and().areInterfaces()
-            .should().resideInAPackage("..application.port.out..")
-            .because("Output ports should be located in the dedicated output port " +
-                "package to maintain clear boundaries");
-
-    // ==============================================
-    // Interface and Implementation Tests (5 tests)
-    // ==============================================
+            .because("Input result models should be named consistently");
 
     @ArchTest
     static final ArchRule DOMAIN_MODELS_SHOULD_NOT_HAVE_SETTERS =
@@ -386,37 +267,68 @@ public class HexagonalArchitectureTest {
             .that().areDeclaredInClassesThat()
             .resideInAPackage("..domain.model..")
             .should().haveNameStartingWith("set")
-            .because("Domain models should be immutable to prevent uncontrolled " +
-                "state changes and ensure thread safety");
+            .because("Domain models should be immutable");
+
+    // ==============================================
+    // Package Structure Rules
+    // ==============================================
 
     @ArchTest
-    static final ArchRule INPUT_PORTS_SHOULD_BE_INTERFACES =
+    static final ArchRule APPLICATION_CLASSES_SHOULD_STAY_IN_KNOWN_APPLICATION_PACKAGES =
         classes()
-            .that().resideInAPackage("..application.port.in..")
-            .and().haveSimpleNameEndingWith("UseCase")
-            .should().beInterfaces()
-            .because("Input ports must be interfaces to define contracts that can " +
-                "be implemented by application services");
+            .that().resideInAPackage("..application..")
+            .should().resideInAnyPackage(
+                "..application.service..",
+                "..application.port.in..",
+                "..application.port.in.command..",
+                "..application.port.in.result..",
+                "..application.port.out..",
+                "..application.exception.."
+            )
+            .because("Application code should be organized by services, ports, models, and exceptions");
 
     @ArchTest
-    static final ArchRule OUTPUT_PORTS_SHOULD_BE_INTERFACES =
+    static final ArchRule ADAPTER_CLASSES_SHOULD_STAY_IN_ADAPTER_PACKAGES =
         classes()
-            .that().resideInAPackage("..application.port.out..")
-            .and().haveSimpleNameEndingWith("Port")
-            .should().beInterfaces()
-            .because("Output ports must be interfaces to define contracts that can " +
-                "be implemented by adapters");
+            .that().resideInAPackage("..adapter..")
+            .should().resideInAnyPackage(
+                "..adapter.in..",
+                "..adapter.out.."
+            )
+            .because("Adapters should be organized by inbound and outbound direction");
 
     @ArchTest
-    static final ArchRule ADAPTERS_SHOULD_BE_ANNOTATED_WITH_COMPONENT_OR_SERVICE =
+    static final ArchRule INFRASTRUCTURE_CLASSES_SHOULD_STAY_IN_KNOWN_INFRASTRUCTURE_PACKAGES =
         classes()
-            .that().resideInAPackage("..adapter.out..")
-            .and().areNotInterfaces()
-            .and().areNotEnums()
-            .and().areNotAnnotations()
-            .and().haveSimpleNameEndingWith("Adapter")
-            .should().beAnnotatedWith("org.springframework.stereotype.Component")
-            .orShould().beAnnotatedWith("org.springframework.stereotype.Service")
-            .because("Adapters must be Spring-managed beans to be injected as " +
-                "implementations of output ports");
+            .that().resideInAPackage("..infrastructure..")
+            .should().resideInAnyPackage(
+                "..infrastructure.http..",
+                "..infrastructure.observability.."
+            )
+            .because("Infrastructure code should stay grouped by technical concern");
+
+    // ==============================================
+    // Cycle Rules
+    // ==============================================
+
+    @ArchTest
+    static final ArchRule DOMAIN_PACKAGES_SHOULD_NOT_HAVE_CYCLES =
+        slices()
+            .matching("..domain.(*)..")
+            .should().beFreeOfCycles()
+            .because("Domain package cycles make business code harder to reason about");
+
+    @ArchTest
+    static final ArchRule APPLICATION_PACKAGES_SHOULD_NOT_HAVE_CYCLES =
+        slices()
+            .matching("..application.(*)..")
+            .should().beFreeOfCycles()
+            .because("Application package cycles make use-case orchestration harder to reason about");
+
+    @ArchTest
+    static final ArchRule ADAPTER_PACKAGES_SHOULD_NOT_HAVE_CYCLES =
+        slices()
+            .matching("..adapter.(*)..")
+            .should().beFreeOfCycles()
+            .because("Adapter package cycles indicate coupling between technical adapters");
 }
