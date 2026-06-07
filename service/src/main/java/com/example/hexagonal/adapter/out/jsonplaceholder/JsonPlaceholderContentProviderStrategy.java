@@ -1,6 +1,6 @@
 package com.example.hexagonal.adapter.out.jsonplaceholder;
 
-import com.example.hexagonal.application.service.ContentProviderStrategy;
+import com.example.hexagonal.application.port.out.ContentProviderStrategyPort;
 import com.example.hexagonal.domain.model.Content;
 import com.example.hexagonal.domain.model.ContentProviderType;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
-public class JsonPlaceholderContentProviderStrategy implements ContentProviderStrategy {
+public class JsonPlaceholderContentProviderStrategy implements ContentProviderStrategyPort {
 
     private final JsonPlaceholderContentProviderAdapter jsonPlaceholderContentProviderAdapter;
 

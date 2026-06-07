@@ -84,6 +84,14 @@ public class HexagonalArchitectureTest {
             .because("Outbound adapters must not depend on transport-specific inbound adapter concerns");
 
     @ArchTest
+    static final ArchRule ADAPTER_OUT_SHOULD_NOT_DEPEND_ON_APPLICATION_SERVICES =
+        noClasses()
+            .that().resideInAPackage("..adapter.out..")
+            .should().dependOnClassesThat()
+            .resideInAPackage("..application.service..")
+            .because("Outbound adapters should depend on output ports, not application service internals");
+
+    @ArchTest
     static final ArchRule WEB_CONTROLLERS_SHOULD_NOT_DEPEND_ON_APPLICATION_SERVICES =
         noClasses()
             .that().resideInAPackage("..adapter.in.web..")
@@ -128,6 +136,14 @@ public class HexagonalArchitectureTest {
             .should().dependOnClassesThat()
             .resideInAnyPackage("..contract.api..", "..contract.model..")
             .because("Generated OpenAPI contracts belong to inbound web adapters, not outbound integrations");
+
+    @ArchTest
+    static final ArchRule SHARED_ERROR_CLASSIFICATION_SHOULD_NOT_DEPEND_ON_WEB_OR_SPRING =
+        noClasses()
+            .that().resideInAPackage("..application.error..")
+            .should().dependOnClassesThat()
+            .resideInAnyPackage("..adapter..", "..infrastructure..", "org.springframework..", "reactor..")
+            .because("Shared error codes and classification must be reusable by Web, Kafka, AMQP, and gRPC adapters");
 
     // ==============================================
     // Framework Isolation Rules
@@ -287,6 +303,7 @@ public class HexagonalArchitectureTest {
             .that().resideInAPackage("..application..")
             .should().resideInAnyPackage(
                 "..application.service..",
+                "..application.error..",
                 "..application.port.in..",
                 "..application.port.in.command..",
                 "..application.port.in.result..",

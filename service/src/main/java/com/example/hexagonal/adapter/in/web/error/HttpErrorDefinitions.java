@@ -1,29 +1,30 @@
 package com.example.hexagonal.adapter.in.web.error;
 
+import com.example.hexagonal.application.error.ErrorCode;
 import org.springframework.http.HttpStatus;
 
 import java.util.EnumMap;
 import java.util.Map;
 
-final class ErrorDefinitions {
+final class HttpErrorDefinitions {
 
     private static final String SYSTEM = "hexagonal";
 
-    private static final Map<ErrorCode, ErrorDefinition> DEFINITIONS = definitions();
+    private static final Map<ErrorCode, HttpErrorDefinition> DEFINITIONS = definitions();
 
-    private ErrorDefinitions() {
+    private HttpErrorDefinitions() {
     }
 
-    static ErrorDefinition definition(ErrorCode errorCode) {
-        ErrorDefinition definition = DEFINITIONS.get(errorCode);
+    static HttpErrorDefinition definition(ErrorCode errorCode) {
+        HttpErrorDefinition definition = DEFINITIONS.get(errorCode);
         if (definition == null) {
             throw new IllegalArgumentException("No error definition configured for " + errorCode);
         }
         return definition;
     }
 
-    private static Map<ErrorCode, ErrorDefinition> definitions() {
-        Map<ErrorCode, ErrorDefinition> definitions = new EnumMap<>(ErrorCode.class);
+    private static Map<ErrorCode, HttpErrorDefinition> definitions() {
+        Map<ErrorCode, HttpErrorDefinition> definitions = new EnumMap<>(ErrorCode.class);
 
         definitions.put(ErrorCode.MISSING_HEADER, validation(
             ErrorCode.MISSING_HEADER,
@@ -117,8 +118,8 @@ final class ErrorDefinitions {
         return Map.copyOf(definitions);
     }
 
-    private static ErrorDefinition validation(ErrorCode code, String type, String title) {
-        return new DefaultErrorDefinition(
+    private static HttpErrorDefinition validation(ErrorCode code, String type, String title) {
+        return new DefaultHttpErrorDefinition(
             code,
             HttpStatus.BAD_REQUEST,
             SYSTEM,
@@ -129,13 +130,13 @@ final class ErrorDefinitions {
         );
     }
 
-    private static ErrorDefinition problem(ErrorCode code,
+    private static HttpErrorDefinition problem(ErrorCode code,
                                            HttpStatus status,
                                            String type,
                                            String title,
                                            boolean expected) {
 
-        return new DefaultErrorDefinition(
+        return new DefaultHttpErrorDefinition(
             code,
             status,
             SYSTEM,

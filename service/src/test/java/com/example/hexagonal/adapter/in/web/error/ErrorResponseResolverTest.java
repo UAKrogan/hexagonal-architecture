@@ -32,7 +32,8 @@ class ErrorResponseResolverTest {
     private final ErrorResponseResolver resolver =
         new ErrorResponseResolver(
             Mappers.getMapper(ProblemResponseMapper.class),
-            new ExceptionToErrorCodeResolver()
+            new WebExceptionToErrorCodeResolver(),
+            new ValidationErrorExtractor(Mappers.getMapper(ProblemResponseMapper.class))
         );
 
     @Test

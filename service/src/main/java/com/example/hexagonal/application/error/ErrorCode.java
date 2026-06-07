@@ -1,6 +1,6 @@
-package com.example.hexagonal.adapter.in.web.error;
+package com.example.hexagonal.application.error;
 
-enum ErrorCode {
+public enum ErrorCode {
     MISSING_HEADER,
     VALIDATION_ERROR,
     MISSING_REQUEST_VALUE,

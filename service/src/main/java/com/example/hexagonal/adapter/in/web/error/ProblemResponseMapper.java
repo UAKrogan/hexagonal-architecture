@@ -1,5 +1,6 @@
 package com.example.hexagonal.adapter.in.web.error;
 
+import com.example.hexagonal.application.error.ErrorCode;
 import com.example.hexagonal.contract.model.ProblemDto;
 import com.example.hexagonal.contract.model.ValidationErrorDto;
 import com.example.hexagonal.contract.model.ValidationProblemDto;
@@ -26,12 +27,12 @@ public interface ProblemResponseMapper {
     @Mapping(target = "message", source = "message")
     ValidationErrorDto toValidationError(String field, String code, String message);
 
-    default ErrorDefinition definition(ErrorCode errorCode) {
-        return ErrorDefinitions.definition(errorCode);
+    default HttpErrorDefinition definition(ErrorCode errorCode) {
+        return HttpErrorDefinitions.definition(errorCode);
     }
 
     default String problemType(ErrorCode errorCode) {
-        ErrorDefinition definition = definition(errorCode);
+        HttpErrorDefinition definition = definition(errorCode);
         return "urn:problem:" + definition.system() + ":" + definition.type();
     }
 }

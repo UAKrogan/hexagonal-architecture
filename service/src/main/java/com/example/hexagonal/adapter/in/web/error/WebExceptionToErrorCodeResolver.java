@@ -1,11 +1,8 @@
 package com.example.hexagonal.adapter.in.web.error;
 
-import com.example.hexagonal.application.exception.ApplicationException;
-import com.example.hexagonal.application.exception.ProviderUnavailableException;
+import com.example.hexagonal.application.error.ErrorCode;
+import com.example.hexagonal.application.error.ExceptionToErrorCodeResolver;
 import com.example.hexagonal.contract.api.ContentApi;
-import com.example.hexagonal.domain.exception.BusinessException;
-import com.example.hexagonal.domain.exception.ContentNotFoundException;
-import com.example.hexagonal.domain.exception.DomainException;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -20,9 +17,12 @@ import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 @Component
-class ExceptionToErrorCodeResolver {
+class WebExceptionToErrorCodeResolver {
 
     private static final String API_VERSION_HEADER = "x-api-version";
+
+    private final ExceptionToErrorCodeResolver exceptionToErrorCodeResolver =
+        new ExceptionToErrorCodeResolver();
 
     ErrorCode resolve(Throwable error, ServerRequest request) {
         if (isMissingApiVersionHeader(error, request)) {
@@ -59,31 +59,12 @@ class ExceptionToErrorCodeResolver {
                 : ErrorCode.INVALID_REQUEST_BODY;
         }
 
-        if (error instanceof ContentNotFoundException) {
-            return ErrorCode.CONTENT_NOT_FOUND;
-        }
-
-        if (error instanceof ProviderUnavailableException) {
-            return ErrorCode.PROVIDER_UNAVAILABLE;
-        }
-
-        if (error instanceof BusinessException) {
-            return ErrorCode.BUSINESS_ERROR;
-        }
-
-        if (error instanceof ApplicationException) {
-            return ErrorCode.APPLICATION_ERROR;
-        }
-
-        if (error instanceof DomainException) {
-            return ErrorCode.DOMAIN_ERROR;
-        }
-
         if (error instanceof ResponseStatusException ex && ex.getStatusCode().value() == HttpStatus.NOT_FOUND.value()) {
             return ErrorCode.ROUTE_NOT_FOUND;
         }
 
-        return ErrorCode.UNEXPECTED_ERROR;
+        return exceptionToErrorCodeResolver.resolve(error)
+            .orElse(ErrorCode.UNEXPECTED_ERROR);
     }
 
     private boolean isMissingApiVersionHeader(Throwable error, ServerRequest request) {

@@ -1,6 +1,7 @@
 package com.example.hexagonal.adapter.in.web.error;
 
 import com.example.hexagonal.test.tag.UnitTest;
+import com.example.hexagonal.application.error.ErrorCode;
 import com.example.hexagonal.contract.model.ProblemDto;
 import com.example.hexagonal.contract.model.ValidationErrorDto;
 import org.junit.jupiter.api.Test;

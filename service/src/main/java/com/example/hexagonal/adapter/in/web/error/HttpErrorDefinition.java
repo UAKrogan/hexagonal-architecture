@@ -1,8 +1,9 @@
 package com.example.hexagonal.adapter.in.web.error;
 
+import com.example.hexagonal.application.error.ErrorCode;
 import org.springframework.http.HttpStatus;
 
-interface ErrorDefinition {
+interface HttpErrorDefinition {
 
     ErrorCode code();
 

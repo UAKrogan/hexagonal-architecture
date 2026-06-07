@@ -1,6 +1,7 @@
 package com.example.hexagonal.application.service;
 
 import com.example.hexagonal.test.tag.UnitTest;
+import com.example.hexagonal.application.port.out.ContentProviderStrategyPort;
 import com.example.hexagonal.domain.model.ContentProviderType;
 import org.junit.jupiter.api.Test;
 
@@ -15,8 +16,8 @@ class ContentProviderStrategyResolverTest {
 
     @Test
     void shouldResolveStrategyByProviderType() {
-        ContentProviderStrategy jsonPlaceholderStrategy = mock(ContentProviderStrategy.class);
-        ContentProviderStrategy dummyJsonStrategy = mock(ContentProviderStrategy.class);
+        ContentProviderStrategyPort jsonPlaceholderStrategy = mock(ContentProviderStrategyPort.class);
+        ContentProviderStrategyPort dummyJsonStrategy = mock(ContentProviderStrategyPort.class);
 
         when(jsonPlaceholderStrategy.getProviderType()).thenReturn(ContentProviderType.JSONPLACEHOLDER);
         when(dummyJsonStrategy.getProviderType()).thenReturn(ContentProviderType.DUMMYJSON);

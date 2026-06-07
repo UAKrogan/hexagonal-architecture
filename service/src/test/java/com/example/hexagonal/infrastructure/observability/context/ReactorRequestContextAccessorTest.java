@@ -7,9 +7,9 @@ import reactor.test.StepVerifier;
 import java.util.Map;
 
 @UnitTest
-class RequestContextAccessorTest {
+class ReactorRequestContextAccessorTest {
 
-    private final RequestContextAccessor requestContextAccessor = new RequestContextAccessor();
+    private final ReactorRequestContextAccessor requestContextAccessor = new ReactorRequestContextAccessor();
 
     @Test
     void shouldReadRequestContextFromReactorContext() {
