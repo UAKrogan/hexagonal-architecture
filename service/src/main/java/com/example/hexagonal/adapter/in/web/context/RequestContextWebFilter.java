@@ -1,7 +1,7 @@
 package com.example.hexagonal.adapter.in.web.context;
 
 import com.example.hexagonal.infrastructure.context.RequestContext;
-import com.example.hexagonal.infrastructure.context.RequestContextHeaders;
+import com.example.hexagonal.infrastructure.context.RequestContextFactory;
 import com.example.hexagonal.infrastructure.http.propagation.HeaderPropagationProperties;
 import com.example.hexagonal.infrastructure.logging.RequestContextMdcThreadLocalAccessor;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +15,7 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -22,9 +23,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class RequestContextWebFilter implements WebFilter {
 
-    private static final String UNKNOWN = "unknown";
-
     private final HeaderPropagationProperties headerPropagationProperties;
+    private final RequestContextFactory requestContextFactory;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
@@ -39,30 +39,26 @@ public class RequestContextWebFilter implements WebFilter {
     }
 
     private RequestContext createRequestContext(ServerWebExchange exchange) {
-        HttpHeaders headers = exchange.getRequest().getHeaders();
-        String correlationId = firstHeaderOrDefault(
-            headers,
-            RequestContextHeaders.CORRELATION_ID,
+        return requestContextFactory.create(
+            firstValueHeaders(exchange.getRequest().getHeaders()),
+            headerPropagationProperties.normalizedHeaders(),
             exchange.getRequest().getId()
         );
-        String apiVersion = firstHeaderOrDefault(headers, RequestContextHeaders.API_VERSION, UNKNOWN);
-
-        Map<String, String> propagatedHeaders = new HashMap<>();
-        for (String headerName : headerPropagationProperties.normalizedHeaders()) {
-            String value = headers.getFirst(headerName);
-            if (value != null) {
-                propagatedHeaders.put(headerName, value);
-            }
-        }
-
-        propagatedHeaders.putIfAbsent(RequestContextHeaders.CORRELATION_ID, correlationId);
-        propagatedHeaders.putIfAbsent(RequestContextHeaders.API_VERSION, apiVersion);
-
-        return new RequestContext(correlationId, apiVersion, propagatedHeaders);
     }
 
-    private String firstHeaderOrDefault(HttpHeaders headers, String headerName, String defaultValue) {
-        String value = headers.getFirst(headerName);
-        return value == null || value.isBlank() ? defaultValue : value;
+    private Map<String, String> firstValueHeaders(HttpHeaders httpHeaders) {
+        Map<String, String> headers = new HashMap<>();
+
+        httpHeaders.forEach((name, values) -> {
+            if (!values.isEmpty()) {
+                headers.put(name, firstValue(values));
+            }
+        });
+
+        return Map.copyOf(headers);
+    }
+
+    private String firstValue(List<String> values) {
+        return values.isEmpty() ? null : values.getFirst();
     }
 }
