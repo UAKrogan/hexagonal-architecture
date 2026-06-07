@@ -1,17 +1,9 @@
 package com.example.hexagonal.adapter.in.web.error;
 
-import com.example.hexagonal.application.exception.ApplicationException;
-import com.example.hexagonal.application.exception.ProviderUnavailableException;
-import com.example.hexagonal.contract.api.ContentApi;
 import com.example.hexagonal.contract.model.ValidationErrorDto;
 import com.example.hexagonal.contract.model.ValidationProblemDto;
-import com.example.hexagonal.domain.exception.BusinessException;
-import com.example.hexagonal.domain.exception.ContentNotFoundException;
-import com.example.hexagonal.domain.exception.DomainException;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.codec.DecodingException;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.validation.method.ParameterErrors;
@@ -24,7 +16,6 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.MissingRequestValueException;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
@@ -40,175 +31,166 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ErrorResponseResolver {
 
-    private static final String SYSTEM = "hexagonal";
     private static final String API_VERSION_HEADER = "x-api-version";
 
     private final ProblemResponseMapper problemResponseMapper;
+    private final ExceptionToErrorCodeResolver exceptionToErrorCodeResolver;
 
     ErrorResponse toErrorResponse(Throwable error, ServerRequest request) {
+        ErrorCode errorCode = exceptionToErrorCodeResolver.resolve(error, request);
+        ErrorDefinition definition = ErrorDefinitions.definition(errorCode);
 
-        if (isMissingApiVersionHeader(error, request)) {
-            return validationProblem(
-                "missing-header",
-                "Missing required header",
-                "Required request header 'x-api-version' is missing.",
-                List.of(validationError(API_VERSION_HEADER, "required", "Required request header is missing."))
+        Object body = switch (definition.responseBody()) {
+            case PROBLEM -> problem(errorCode, details(errorCode, error, request));
+            case VALIDATION_PROBLEM -> validationProblem(
+                errorCode,
+                details(errorCode, error, request),
+                validationErrors(errorCode, error)
             );
-        }
+        };
 
-        if (error instanceof WebExchangeBindException ex) {
-            return validationProblem(
-                "validation-error",
-                "Validation failed",
-                "Request validation failed.",
-                validationErrors(ex)
-            );
-        }
-
-        if (error instanceof HandlerMethodValidationException ex) {
-            return validationProblem(
-                "validation-error",
-                "Validation failed",
-                "Request validation failed.",
-                validationErrors(ex)
-            );
-        }
-
-        if (error instanceof MissingRequestValueException ex) {
-            String label = Objects.requireNonNullElse(ex.getLabel(), "request value");
-            return validationProblem(
-                "missing-" + label.replace(' ', '-').toLowerCase(Locale.ROOT),
-                "Missing required " + label,
-                "Required " + label + " '" + ex.getName() + "' is missing.",
-                List.of(validationError(ex.getName(), "required", "Required " + label + " is missing."))
-            );
-        }
-
-        if (error instanceof InvalidApiVersionException ex) {
-            return validationProblem(
-                "invalid-api-version",
-                "Invalid API version",
-                nonBlankOrDefault(ex.getReason(), "The requested API version is not supported."),
-                List.of(validationError(API_VERSION_HEADER, "invalid", "Requested API version is not supported."))
-            );
-        }
-
-        if (error instanceof UnsupportedMediaTypeStatusException ex) {
-            return problem(
-                HttpStatus.UNSUPPORTED_MEDIA_TYPE,
-                "unsupported-media-type",
-                "Unsupported media type",
-                nonBlankOrDefault(ex.getReason(), "The request media type is not supported.")
-            );
-        }
-
-        if (error instanceof MethodNotAllowedException ex) {
-            return problem(
-                HttpStatus.METHOD_NOT_ALLOWED,
-                "method-not-allowed",
-                "Method not allowed",
-                "HTTP method " + ex.getHttpMethod() + " is not supported for " + request.path() + "."
-            );
-        }
-
-        if (error instanceof ServerWebInputException ex) {
-            return validationProblem(
-                inputProblemType(ex),
-                inputProblemTitle(ex),
-                nonBlankOrDefault(ex.getReason(), "The request body is invalid."),
-                List.of(validationError("body", inputProblemCode(ex), nonBlankOrDefault(ex.getReason(), "Invalid request body.")))
-            );
-        }
-
-        if (error instanceof ContentNotFoundException ex) {
-            return problem(
-                HttpStatus.NOT_FOUND,
-                "content-not-found",
-                "Content not found",
-                nonBlankOrDefault(ex.getMessage(), "The requested content could not be found.")
-            );
-        }
-
-        if (error instanceof ProviderUnavailableException ex) {
-            return problem(
-                HttpStatus.BAD_GATEWAY,
-                "provider-unavailable",
-                "Content provider unavailable",
-                nonBlankOrDefault(ex.getMessage(), "The content provider is unavailable.")
-            );
-        }
-
-        if (error instanceof BusinessException ex) {
-            return validationProblem(
-                "business-error",
-                "Business rule violation",
-                nonBlankOrDefault(ex.getMessage(), "The request violates a business rule."),
-                List.of()
-            );
-        }
-
-        if (error instanceof ApplicationException ex) {
-            return validationProblem(
-                "application-error",
-                "Application error",
-                nonBlankOrDefault(ex.getMessage(), "The request could not be processed."),
-                List.of()
-            );
-        }
-
-        if (error instanceof DomainException ex) {
-            return validationProblem(
-                "domain-error",
-                "Domain error",
-                nonBlankOrDefault(ex.getMessage(), "The request violates a domain rule."),
-                List.of()
-            );
-        }
-
-        if (error instanceof ResponseStatusException ex && ex.getStatusCode().value() == HttpStatus.NOT_FOUND.value()) {
-            return problem(
-                HttpStatus.NOT_FOUND,
-                "route-not-found",
-                "Route not found",
-                "No route found for " + request.method().name() + " " + request.path() + "."
-            );
-        }
-
-        return problem(
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            "unexpected-error",
-            "Unexpected error",
-            "An unexpected error occurred while processing the request.",
-            false
-        );
+        return new ErrorResponse(definition.status(), body, definition.expected());
     }
 
-    private boolean isMissingApiVersionHeader(Throwable error, ServerRequest request) {
-        return error instanceof ResponseStatusException ex
-            && ex.getStatusCode().value() == HttpStatus.NOT_FOUND.value()
-            && ContentApi.PATH_GET_CONTENT.equals(request.path())
-            && request.headers().firstHeader(API_VERSION_HEADER) == null;
+    private Object problem(ErrorCode errorCode, String details) {
+        return problemResponseMapper.toProblem(errorCode, details);
     }
 
-    private ErrorResponse problem(HttpStatus status, String type, String title, String details) {
-        return problem(status, type, title, details, true);
-    }
-
-    private ErrorResponse problem(HttpStatus status, String type, String title, String details, boolean expected) {
-        return new ErrorResponse(status, problemResponseMapper.toProblem(SYSTEM, type, title, details), expected);
-    }
-
-    private ErrorResponse validationProblem(String type,
-                                            String title,
-                                            String details,
-                                            List<ValidationErrorDto> validationErrors) {
+    private Object validationProblem(ErrorCode errorCode,
+                                     String details,
+                                     List<ValidationErrorDto> validationErrors) {
 
         ValidationProblemDto body = problemResponseMapper.toValidationProblem(
-            problemResponseMapper.toProblem(SYSTEM, type, title, details),
+            problemResponseMapper.toProblem(errorCode, details),
             validationErrors
         );
 
-        return new ErrorResponse(HttpStatus.BAD_REQUEST, body, true);
+        return body;
+    }
+
+    private String details(ErrorCode errorCode, Throwable error, ServerRequest request) {
+        return switch (errorCode) {
+            case MISSING_HEADER -> missingHeaderDetails(error);
+            case VALIDATION_ERROR -> "Request validation failed.";
+            case MISSING_REQUEST_VALUE -> missingRequestValueDetails(error);
+            case INVALID_API_VERSION -> invalidApiVersionDetails(error);
+            case UNSUPPORTED_MEDIA_TYPE -> unsupportedMediaTypeDetails(error);
+            case METHOD_NOT_ALLOWED -> methodNotAllowedDetails(error, request);
+            case INVALID_JSON, INVALID_REQUEST_BODY -> requestBodyDetails(error);
+            case CONTENT_NOT_FOUND -> nonBlankOrDefault(error.getMessage(), "The requested content could not be found.");
+            case PROVIDER_UNAVAILABLE -> nonBlankOrDefault(error.getMessage(), "The content provider is unavailable.");
+            case BUSINESS_ERROR -> nonBlankOrDefault(error.getMessage(), "The request violates a business rule.");
+            case APPLICATION_ERROR -> nonBlankOrDefault(error.getMessage(), "The request could not be processed.");
+            case DOMAIN_ERROR -> nonBlankOrDefault(error.getMessage(), "The request violates a domain rule.");
+            case ROUTE_NOT_FOUND -> "No route found for " + request.method().name() + " " + request.path() + ".";
+            case UNEXPECTED_ERROR -> "An unexpected error occurred while processing the request.";
+        };
+    }
+
+    private List<ValidationErrorDto> validationErrors(ErrorCode errorCode, Throwable error) {
+        return switch (errorCode) {
+            case MISSING_HEADER -> List.of(missingHeaderValidationError(error));
+            case VALIDATION_ERROR -> validationErrors(error);
+            case MISSING_REQUEST_VALUE -> List.of(missingRequestValueValidationError(error));
+            case INVALID_API_VERSION -> List.of(
+                validationError(API_VERSION_HEADER, "invalid", "Requested API version is not supported.")
+            );
+            case INVALID_JSON, INVALID_REQUEST_BODY -> List.of(requestBodyValidationError(errorCode, error));
+            case BUSINESS_ERROR, APPLICATION_ERROR, DOMAIN_ERROR -> List.of();
+            default -> List.of();
+        };
+    }
+
+    private List<ValidationErrorDto> validationErrors(Throwable error) {
+        if (error instanceof WebExchangeBindException ex) {
+            return validationErrors(ex);
+        }
+        if (error instanceof HandlerMethodValidationException ex) {
+            return validationErrors(ex);
+        }
+        return List.of();
+    }
+
+    private String missingHeaderDetails(Throwable error) {
+        if (error instanceof MissingRequestValueException ex) {
+            String label = requestValueLabel(ex);
+            return "Required " + label + " '" + ex.getName() + "' is missing.";
+        }
+
+        return "Required request header 'x-api-version' is missing.";
+    }
+
+    private ValidationErrorDto missingHeaderValidationError(Throwable error) {
+        if (error instanceof MissingRequestValueException ex) {
+            String label = requestValueLabel(ex);
+            return validationError(ex.getName(), "required", "Required " + label + " is missing.");
+        }
+
+        return validationError(API_VERSION_HEADER, "required", "Required request header is missing.");
+    }
+
+    private String missingRequestValueDetails(Throwable error) {
+        if (error instanceof MissingRequestValueException ex) {
+            String label = requestValueLabel(ex);
+            return "Required " + label + " '" + ex.getName() + "' is missing.";
+        }
+
+        return "Required request value is missing.";
+    }
+
+    private ValidationErrorDto missingRequestValueValidationError(Throwable error) {
+        if (error instanceof MissingRequestValueException ex) {
+            String label = requestValueLabel(ex);
+            return validationError(ex.getName(), "required", "Required " + label + " is missing.");
+        }
+
+        return validationError("request", "required", "Required request value is missing.");
+    }
+
+    private String requestValueLabel(MissingRequestValueException ex) {
+        return Objects.requireNonNullElse(ex.getLabel(), "request value");
+    }
+
+    private String invalidApiVersionDetails(Throwable error) {
+        if (error instanceof InvalidApiVersionException ex) {
+            return nonBlankOrDefault(ex.getReason(), "The requested API version is not supported.");
+        }
+
+        return "The requested API version is not supported.";
+    }
+
+    private String unsupportedMediaTypeDetails(Throwable error) {
+        if (error instanceof UnsupportedMediaTypeStatusException ex) {
+            return nonBlankOrDefault(ex.getReason(), "The request media type is not supported.");
+        }
+
+        return "The request media type is not supported.";
+    }
+
+    private String methodNotAllowedDetails(Throwable error, ServerRequest request) {
+        if (error instanceof MethodNotAllowedException ex) {
+            return "HTTP method " + ex.getHttpMethod() + " is not supported for " + request.path() + ".";
+        }
+
+        return "HTTP method " + request.method().name() + " is not supported for " + request.path() + ".";
+    }
+
+    private String requestBodyDetails(Throwable error) {
+        if (error instanceof ServerWebInputException ex) {
+            return nonBlankOrDefault(ex.getReason(), "The request body is invalid.");
+        }
+
+        return "The request body is invalid.";
+    }
+
+    private ValidationErrorDto requestBodyValidationError(ErrorCode errorCode, Throwable error) {
+        String code = errorCode == ErrorCode.INVALID_JSON ? "invalidJson" : "invalidBody";
+
+        if (error instanceof ServerWebInputException ex) {
+            return validationError("body", code, nonBlankOrDefault(ex.getReason(), "Invalid request body."));
+        }
+
+        return validationError("body", code, "Invalid request body.");
     }
 
     private List<ValidationErrorDto> validationErrors(WebExchangeBindException ex) {
@@ -287,41 +269,6 @@ public class ErrorResponseResolver {
         }
         String parameterName = parameter.getParameterName();
         return parameterName != null ? parameterName : "request";
-    }
-
-    private String inputProblemType(ServerWebInputException ex) {
-        return hasCause(ex, DecodingException.class) || hasJsonCause(ex) ? "invalid-json" : "invalid-request-body";
-    }
-
-    private String inputProblemTitle(ServerWebInputException ex) {
-        return hasCause(ex, DecodingException.class) || hasJsonCause(ex) ? "Invalid JSON" : "Invalid request body";
-    }
-
-    private String inputProblemCode(ServerWebInputException ex) {
-        return hasCause(ex, DecodingException.class) || hasJsonCause(ex) ? "invalidJson" : "invalidBody";
-    }
-
-    private boolean hasCause(Throwable error, Class<? extends Throwable> expectedType) {
-        Throwable current = error;
-        while (current != null) {
-            if (expectedType.isInstance(current)) {
-                return true;
-            }
-            current = current.getCause();
-        }
-        return false;
-    }
-
-    private boolean hasJsonCause(Throwable error) {
-        Throwable current = error;
-        while (current != null) {
-            String simpleName = current.getClass().getSimpleName();
-            if (simpleName.contains("Json") || simpleName.contains("JSON")) {
-                return true;
-            }
-            current = current.getCause();
-        }
-        return false;
     }
 
     private ValidationErrorDto validationError(String field, String code, String message) {

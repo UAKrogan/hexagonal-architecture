@@ -11,11 +11,11 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ProblemResponseMapper {
 
-    @Mapping(target = "type", expression = "java(\"urn:problem:\" + system + \":\" + type)")
-    @Mapping(target = "system", source = "system")
-    @Mapping(target = "title", source = "title")
+    @Mapping(target = "type", expression = "java(problemType(errorCode))")
+    @Mapping(target = "system", expression = "java(definition(errorCode).system())")
+    @Mapping(target = "title", expression = "java(definition(errorCode).title())")
     @Mapping(target = "details", source = "details")
-    ProblemDto toProblem(String system, String type, String title, String details);
+    ProblemDto toProblem(ErrorCode errorCode, String details);
 
     @Mapping(target = "problem", source = "problem")
     @Mapping(target = "validationErrors", source = "validationErrors")
@@ -25,4 +25,13 @@ public interface ProblemResponseMapper {
     @Mapping(target = "code", source = "code")
     @Mapping(target = "message", source = "message")
     ValidationErrorDto toValidationError(String field, String code, String message);
+
+    default ErrorDefinition definition(ErrorCode errorCode) {
+        return ErrorDefinitions.definition(errorCode);
+    }
+
+    default String problemType(ErrorCode errorCode) {
+        ErrorDefinition definition = definition(errorCode);
+        return "urn:problem:" + definition.system() + ":" + definition.type();
+    }
 }

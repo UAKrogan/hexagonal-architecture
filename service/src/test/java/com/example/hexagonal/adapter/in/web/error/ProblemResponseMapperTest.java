@@ -18,9 +18,7 @@ class ProblemResponseMapperTest {
     @Test
     void shouldMapProblemResponse() {
         ProblemDto problem = problemResponseMapper.toProblem(
-            "hexagonal",
-            "business-error",
-            "Business rule violation",
+            ErrorCode.BUSINESS_ERROR,
             "The request violates a business rule."
         );
 
@@ -32,7 +30,7 @@ class ProblemResponseMapperTest {
 
     @Test
     void shouldMapValidationProblemResponse() {
-        ProblemDto problem = problemResponseMapper.toProblem("hexagonal", "validation-error", "Validation failed", "Invalid");
+        ProblemDto problem = problemResponseMapper.toProblem(ErrorCode.VALIDATION_ERROR, "Invalid");
         ValidationErrorDto validationError = problemResponseMapper.toValidationError("contentId", "required", "Required");
 
         var validationProblem = problemResponseMapper.toValidationProblem(problem, List.of(validationError));

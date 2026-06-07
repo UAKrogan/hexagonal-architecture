@@ -30,7 +30,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ErrorResponseResolverTest {
 
     private final ErrorResponseResolver resolver =
-        new ErrorResponseResolver(Mappers.getMapper(ProblemResponseMapper.class));
+        new ErrorResponseResolver(
+            Mappers.getMapper(ProblemResponseMapper.class),
+            new ExceptionToErrorCodeResolver()
+        );
 
     @Test
     void shouldMapBusinessExceptionToBadRequestValidationProblem() {
