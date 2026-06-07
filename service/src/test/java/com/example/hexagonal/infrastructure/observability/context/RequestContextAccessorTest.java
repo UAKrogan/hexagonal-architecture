@@ -1,4 +1,4 @@
-package com.example.hexagonal.infrastructure.context;
+package com.example.hexagonal.infrastructure.observability.context;
 
 import com.example.hexagonal.test.tag.UnitTest;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,6 @@
 package com.example.hexagonal.infrastructure.http.propagation;
 
-import com.example.hexagonal.infrastructure.context.RequestContextHeaders;
+import com.example.hexagonal.infrastructure.observability.context.RequestContextHeaders;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;

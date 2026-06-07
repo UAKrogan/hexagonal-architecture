@@ -1,7 +1,7 @@
-package com.example.hexagonal.infrastructure.context;
+package com.example.hexagonal.infrastructure.observability.context;
 
 import com.example.hexagonal.infrastructure.http.propagation.HeaderPropagationProperties;
-import com.example.hexagonal.infrastructure.logging.RequestContextMdcThreadLocalAccessor;
+import com.example.hexagonal.infrastructure.observability.logging.RequestContextMdcThreadLocalAccessor;
 import io.micrometer.context.ContextRegistry;
 import jakarta.annotation.PostConstruct;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

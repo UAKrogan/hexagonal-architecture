@@ -1,4 +1,4 @@
-package com.example.hexagonal.infrastructure.context;
+package com.example.hexagonal.infrastructure.observability.context;
 
 public final class RequestContextHeaders {
 

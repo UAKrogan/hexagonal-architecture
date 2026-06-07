@@ -1,9 +1,9 @@
 package com.example.hexagonal.adapter.in.web.context;
 
 import com.example.hexagonal.test.tag.UnitTest;
-import com.example.hexagonal.infrastructure.context.RequestContext;
-import com.example.hexagonal.infrastructure.context.RequestContextFactory;
-import com.example.hexagonal.infrastructure.context.RequestContextHeaders;
+import com.example.hexagonal.infrastructure.observability.context.RequestContext;
+import com.example.hexagonal.infrastructure.observability.context.RequestContextFactory;
+import com.example.hexagonal.infrastructure.observability.context.RequestContextHeaders;
 import com.example.hexagonal.infrastructure.http.propagation.HeaderPropagationProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;

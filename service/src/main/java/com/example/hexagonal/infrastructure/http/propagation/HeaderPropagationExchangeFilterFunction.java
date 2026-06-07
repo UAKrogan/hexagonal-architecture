@@ -1,6 +1,6 @@
 package com.example.hexagonal.infrastructure.http.propagation;
 
-import com.example.hexagonal.infrastructure.context.RequestContext;
+import com.example.hexagonal.infrastructure.observability.context.RequestContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientRequest;

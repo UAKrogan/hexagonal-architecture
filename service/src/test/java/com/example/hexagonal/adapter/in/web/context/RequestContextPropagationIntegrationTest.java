@@ -1,8 +1,8 @@
 package com.example.hexagonal.adapter.in.web.context;
 
 import com.example.hexagonal.test.tag.FunctionalTest;
-import com.example.hexagonal.infrastructure.context.RequestContext;
-import com.example.hexagonal.infrastructure.context.RequestContextHeaders;
+import com.example.hexagonal.infrastructure.observability.context.RequestContext;
+import com.example.hexagonal.infrastructure.observability.context.RequestContextHeaders;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

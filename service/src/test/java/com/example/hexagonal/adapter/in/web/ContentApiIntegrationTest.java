@@ -1,7 +1,7 @@
 package com.example.hexagonal.adapter.in.web;
 
 import com.example.hexagonal.test.tag.FunctionalTest;
-import com.example.hexagonal.infrastructure.context.RequestContextHeaders;
+import com.example.hexagonal.infrastructure.observability.context.RequestContextHeaders;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

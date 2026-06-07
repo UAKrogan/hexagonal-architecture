@@ -1,8 +1,8 @@
 package com.example.hexagonal.infrastructure.http.propagation;
 
 import com.example.hexagonal.test.tag.UnitTest;
-import com.example.hexagonal.infrastructure.context.RequestContext;
-import com.example.hexagonal.infrastructure.context.RequestContextHeaders;
+import com.example.hexagonal.infrastructure.observability.context.RequestContext;
+import com.example.hexagonal.infrastructure.observability.context.RequestContextHeaders;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;

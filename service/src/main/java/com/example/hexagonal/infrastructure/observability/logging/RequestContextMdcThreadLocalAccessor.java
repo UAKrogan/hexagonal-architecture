@@ -1,7 +1,7 @@
-package com.example.hexagonal.infrastructure.logging;
+package com.example.hexagonal.infrastructure.observability.logging;
 
-import com.example.hexagonal.infrastructure.context.RequestContext;
-import com.example.hexagonal.infrastructure.context.RequestContextHeaders;
+import com.example.hexagonal.infrastructure.observability.context.RequestContext;
+import com.example.hexagonal.infrastructure.observability.context.RequestContextHeaders;
 import io.micrometer.context.ThreadLocalAccessor;
 import org.slf4j.MDC;
 

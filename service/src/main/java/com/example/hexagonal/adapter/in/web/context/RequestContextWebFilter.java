@@ -1,9 +1,9 @@
 package com.example.hexagonal.adapter.in.web.context;
 
-import com.example.hexagonal.infrastructure.context.RequestContext;
-import com.example.hexagonal.infrastructure.context.RequestContextFactory;
+import com.example.hexagonal.infrastructure.observability.context.RequestContext;
+import com.example.hexagonal.infrastructure.observability.context.RequestContextFactory;
 import com.example.hexagonal.infrastructure.http.propagation.HeaderPropagationProperties;
-import com.example.hexagonal.infrastructure.logging.RequestContextMdcThreadLocalAccessor;
+import com.example.hexagonal.infrastructure.observability.logging.RequestContextMdcThreadLocalAccessor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;

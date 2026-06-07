@@ -1,8 +1,8 @@
-package com.example.hexagonal.infrastructure.logging;
+package com.example.hexagonal.infrastructure.observability.logging;
 
 import com.example.hexagonal.test.tag.UnitTest;
-import com.example.hexagonal.infrastructure.context.RequestContext;
-import com.example.hexagonal.infrastructure.context.RequestContextHeaders;
+import com.example.hexagonal.infrastructure.observability.context.RequestContext;
+import com.example.hexagonal.infrastructure.observability.context.RequestContextHeaders;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
