@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 
 import java.util.Map;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,14 +53,15 @@ class RequestContextMdcThreadLocalAccessorTest {
 
     @Test
     void shouldCreateMdcContextFromRequestContext() {
+        UUID correlationId = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
         RequestContext requestContext = new RequestContext(
-            "correlation-id",
+            correlationId,
             "1",
-            Map.of(RequestContextHeaders.CORRELATION_ID, "correlation-id")
+            Map.of(RequestContextHeaders.CORRELATION_ID, correlationId.toString())
         );
 
         assertThat(RequestContextMdcThreadLocalAccessor.toMdcContext(requestContext))
-            .containsEntry(RequestContextHeaders.CORRELATION_ID, "correlation-id")
+            .containsEntry(RequestContextHeaders.CORRELATION_ID, correlationId.toString())
             .containsEntry(RequestContextHeaders.API_VERSION, "1");
     }
 }

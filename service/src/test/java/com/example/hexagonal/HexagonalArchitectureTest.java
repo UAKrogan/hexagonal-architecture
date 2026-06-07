@@ -93,6 +93,14 @@ public class HexagonalArchitectureTest {
             .because("Outbound adapters should depend on output ports, not application service internals");
 
     @ArchTest
+    static final ArchRule INFRASTRUCTURE_SHOULD_NOT_DEPEND_ON_ADAPTER_IN =
+        noClasses()
+            .that().resideInAPackage("..infrastructure..")
+            .should().dependOnClassesThat()
+            .resideInAPackage("..adapter.in..")
+            .because("Infrastructure must remain reusable and must not depend on inbound transport implementations");
+
+    @ArchTest
     static final ArchRule WEB_CONTROLLERS_SHOULD_NOT_DEPEND_ON_APPLICATION_SERVICES =
         noClasses()
             .that().resideInAPackage("..adapter.in.web..")
@@ -137,6 +145,15 @@ public class HexagonalArchitectureTest {
             .should().dependOnClassesThat()
             .resideInAnyPackage("..contract.api..", "..contract.model..")
             .because("Generated OpenAPI contracts belong to inbound web adapters, not outbound integrations");
+
+    @ArchTest
+    static final ArchRule GENERATED_CONTRACTS_SHOULD_ONLY_BE_USED_BY_INBOUND_WEB_ADAPTERS =
+        noClasses()
+            .that().resideOutsideOfPackage("..adapter.in.web..")
+            .and().resideOutsideOfPackage("..contract..")
+            .should().dependOnClassesThat()
+            .resideInAnyPackage("..contract.api..", "..contract.model..")
+            .because("Generated OpenAPI contracts are HTTP adapter contracts and must not become shared models");
 
     @ArchTest
     static final ArchRule SHARED_ERROR_CLASSIFICATION_SHOULD_NOT_DEPEND_ON_WEB_OR_SPRING =
@@ -191,6 +208,14 @@ public class HexagonalArchitectureTest {
             .because("Domain should express validation with domain rules, not framework annotations");
 
     @ArchTest
+    static final ArchRule DOMAIN_SHOULD_NOT_DEPEND_ON_LOGGING_FRAMEWORKS =
+        noClasses()
+            .that().resideInAPackage("..domain..")
+            .should().dependOnClassesThat()
+            .resideInAnyPackage("org.slf4j..", "ch.qos.logback..")
+            .because("Domain decisions should be observable from adapters and infrastructure, not through logging APIs");
+
+    @ArchTest
     static final ArchRule APPLICATION_SHOULD_NOT_DEPEND_ON_SPRING =
         noClasses()
             .that().resideInAPackage("..application..")
@@ -217,7 +242,8 @@ public class HexagonalArchitectureTest {
                 "javax.validation..",
                 "com.fasterxml.jackson..",
                 "tools.jackson..",
-                "org.mapstruct.."
+                "org.mapstruct..",
+                "reactor.."
             )
             .because("Command and result models should remain simple application data contracts");
 
@@ -228,6 +254,18 @@ public class HexagonalArchitectureTest {
             .should().dependOnClassesThat()
             .resideInAnyPackage("org.slf4j..", "ch.qos.logback..")
             .because("Operational logging belongs in adapters and infrastructure, not application use-case logic");
+
+    @ArchTest
+    static final ArchRule ADAPTER_OUT_SHOULD_NOT_ACCESS_REQUEST_CONTEXT_DIRECTLY =
+        noClasses()
+            .that().resideInAPackage("..adapter.out..")
+            .should().dependOnClassesThat()
+            .resideInAnyPackage(
+                "..infrastructure.observability.context..",
+                "..infrastructure.observability.logging..",
+                "..infrastructure.http.propagation.."
+            )
+            .because("Outbound adapters should receive propagated headers through centralized infrastructure");
 
     // ==============================================
     // Naming and Shape Rules

@@ -13,6 +13,7 @@ import reactor.test.StepVerifier;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,6 +22,9 @@ import static org.mockito.Mockito.when;
 
 @UnitTest
 class HeaderPropagationExchangeFilterFunctionTest {
+
+    private static final String CORRELATION_ID = "550e8400-e29b-41d4-a716-446655440000";
+    private static final String NEW_CORRELATION_ID = "550e8400-e29b-41d4-a716-446655440001";
 
     private final HeaderPropagationProperties properties = new HeaderPropagationProperties(
         List.of(RequestContextHeaders.CORRELATION_ID, RequestContextHeaders.API_VERSION, "x-allowed")
@@ -40,10 +44,10 @@ class HeaderPropagationExchangeFilterFunctionTest {
             .header("x-not-allowed", "original-value")
             .build();
         RequestContext requestContext = new RequestContext(
-            "correlation-id",
+            UUID.fromString(CORRELATION_ID),
             "1",
             Map.of(
-                RequestContextHeaders.CORRELATION_ID, "correlation-id",
+                RequestContextHeaders.CORRELATION_ID, CORRELATION_ID,
                 RequestContextHeaders.API_VERSION, "1",
                 "x-allowed", "allowed-value",
                 "x-not-allowed", "not-allowed-value"
@@ -56,7 +60,7 @@ class HeaderPropagationExchangeFilterFunctionTest {
             .verifyComplete();
 
         assertThat(capturedRequest.get().headers().getFirst(RequestContextHeaders.CORRELATION_ID))
-            .isEqualTo("correlation-id");
+            .isEqualTo(CORRELATION_ID);
         assertThat(capturedRequest.get().headers().getFirst(RequestContextHeaders.API_VERSION))
             .isEqualTo("1");
         assertThat(capturedRequest.get().headers().getFirst("x-allowed")).isEqualTo("allowed-value");
@@ -94,10 +98,10 @@ class HeaderPropagationExchangeFilterFunctionTest {
             .header(RequestContextHeaders.CORRELATION_ID, "old-value")
             .build();
         RequestContext requestContext = new RequestContext(
-            "new-value",
+            UUID.fromString(NEW_CORRELATION_ID),
             "1",
             Map.of(
-                RequestContextHeaders.CORRELATION_ID, "new-value",
+                RequestContextHeaders.CORRELATION_ID, NEW_CORRELATION_ID,
                 RequestContextHeaders.API_VERSION, "1"
             )
         );
@@ -110,6 +114,6 @@ class HeaderPropagationExchangeFilterFunctionTest {
             .verifyComplete();
 
         assertThat(capturedRequest.get().headers().get(RequestContextHeaders.CORRELATION_ID))
-            .containsExactly("new-value");
+            .containsExactly(NEW_CORRELATION_ID);
     }
 }

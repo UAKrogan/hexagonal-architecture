@@ -17,6 +17,7 @@ import reactor.core.publisher.Mono;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -42,7 +43,7 @@ public class RequestContextWebFilter implements WebFilter {
         return requestContextFactory.create(
             firstValueHeaders(exchange.getRequest().getHeaders()),
             headerPropagationProperties.normalizedHeaders(),
-            exchange.getRequest().getId()
+            UUID.randomUUID()
         );
     }
 

@@ -45,7 +45,13 @@ public class RequestContextMdcThreadLocalAccessor implements ThreadLocalAccessor
 
     public static Map<String, String> toMdcContext(RequestContext requestContext) {
         Map<String, String> mdcContext = new HashMap<>();
-        mdcContext.put(RequestContextHeaders.CORRELATION_ID, requestContext.correlationId());
+        mdcContext.put(
+            RequestContextHeaders.CORRELATION_ID,
+            requestContext.headers().getOrDefault(
+                RequestContextHeaders.CORRELATION_ID,
+                requestContext.correlationId().toString()
+            )
+        );
         mdcContext.put(RequestContextHeaders.API_VERSION, requestContext.apiVersion());
         return Map.copyOf(mdcContext);
     }

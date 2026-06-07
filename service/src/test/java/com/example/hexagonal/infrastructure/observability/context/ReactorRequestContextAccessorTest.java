@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 
 import java.util.Map;
+import java.util.UUID;
 
 @UnitTest
 class ReactorRequestContextAccessorTest {
@@ -13,7 +14,7 @@ class ReactorRequestContextAccessorTest {
 
     @Test
     void shouldReadRequestContextFromReactorContext() {
-        RequestContext requestContext = new RequestContext("correlation-id", "1", Map.of());
+        RequestContext requestContext = new RequestContext(UUID.randomUUID(), "1", Map.of());
 
         StepVerifier.create(requestContextAccessor.current()
                 .contextWrite(context -> context.put(RequestContext.class, requestContext)))

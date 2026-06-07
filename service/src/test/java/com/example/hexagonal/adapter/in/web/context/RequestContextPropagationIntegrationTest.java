@@ -30,6 +30,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -130,7 +131,7 @@ class RequestContextPropagationIntegrationTest {
         RequestContext requestContext = contextCaptureProbe.requestContext();
 
         assertThat(requestContext).isNotNull();
-        assertThat(requestContext.correlationId()).isEqualTo(CORRELATION_ID);
+        assertThat(requestContext.correlationId()).isEqualTo(UUID.fromString(CORRELATION_ID));
         assertThat(requestContext.apiVersion()).isEqualTo(API_VERSION);
         assertThat(requestContext.headers())
             .containsEntry(RequestContextHeaders.CORRELATION_ID, CORRELATION_ID)

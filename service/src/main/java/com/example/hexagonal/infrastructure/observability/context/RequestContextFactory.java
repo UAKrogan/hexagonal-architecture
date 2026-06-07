@@ -15,15 +15,17 @@ public class RequestContextFactory {
 
     public RequestContext create(Map<String, String> inboundHeaders,
                                  Collection<String> propagatedHeaderNames,
-                                 String fallbackCorrelationId) {
+                                 UUID fallbackCorrelationId) {
 
         Map<String, String> normalizedInboundHeaders = normalizeHeaders(inboundHeaders);
+        UUID defaultCorrelationId = fallbackCorrelationId(fallbackCorrelationId);
 
-        String correlationId = headerOrDefault(
+        String correlationIdHeader = headerOrDefault(
             normalizedInboundHeaders,
             RequestContextHeaders.CORRELATION_ID,
-            fallbackCorrelationId(fallbackCorrelationId)
+            defaultCorrelationId.toString()
         );
+        UUID correlationId = parseCorrelationId(correlationIdHeader, defaultCorrelationId);
         String apiVersion = headerOrDefault(
             normalizedInboundHeaders,
             RequestContextHeaders.API_VERSION,
@@ -34,7 +36,7 @@ public class RequestContextFactory {
             normalizedInboundHeaders,
             propagatedHeaderNames
         );
-        propagatedHeaders.put(RequestContextHeaders.CORRELATION_ID, correlationId);
+        propagatedHeaders.put(RequestContextHeaders.CORRELATION_ID, correlationIdHeader);
         propagatedHeaders.put(RequestContextHeaders.API_VERSION, apiVersion);
 
         return new RequestContext(correlationId, apiVersion, propagatedHeaders);
@@ -81,10 +83,16 @@ public class RequestContextFactory {
         return value == null || value.isBlank() ? defaultValue : value;
     }
 
-    private String fallbackCorrelationId(String fallbackCorrelationId) {
-        return fallbackCorrelationId == null || fallbackCorrelationId.isBlank()
-            ? UUID.randomUUID().toString()
-            : fallbackCorrelationId;
+    private UUID fallbackCorrelationId(UUID fallbackCorrelationId) {
+        return fallbackCorrelationId == null ? UUID.randomUUID() : fallbackCorrelationId;
+    }
+
+    private UUID parseCorrelationId(String correlationId, UUID defaultCorrelationId) {
+        try {
+            return UUID.fromString(correlationId);
+        } catch (IllegalArgumentException ex) {
+            return defaultCorrelationId;
+        }
     }
 
     private String normalize(String headerName) {
